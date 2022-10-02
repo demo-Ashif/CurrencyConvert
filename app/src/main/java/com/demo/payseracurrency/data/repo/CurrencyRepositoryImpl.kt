@@ -2,13 +2,13 @@ package com.demo.payseracurrency.data.repo
 
 import com.demo.payseracurrency.data.models.ConvertResponse
 import com.demo.payseracurrency.data.models.LatestCurrencyResponse
-import com.demo.payseracurrency.data.remote.PayseraApi
+import com.demo.payseracurrency.data.remote.CurrencyApi
 import com.demo.payseracurrency.utils.Resource
 import javax.inject.Inject
 
-class PayseraRepositoryImpl @Inject constructor(
-    private val api: PayseraApi
-) : PayseraRepository {
+class CurrencyRepositoryImpl @Inject constructor(
+    private val api: CurrencyApi
+) : CurrencyRepository {
 
     override suspend fun getRates(base: String): Resource<LatestCurrencyResponse> {
         return try {

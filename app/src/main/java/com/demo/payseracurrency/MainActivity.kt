@@ -6,15 +6,17 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.payseracurrency.databinding.ActivityMainBinding
-import com.demo.payseracurrency.viewmodel.PayseraViewModel
+import com.demo.payseracurrency.ui.adapter.CurrencyAdapter
+import com.demo.payseracurrency.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: PayseraViewModel by viewModels()
+    private val viewModel: CurrencyViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,20 +31,28 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        val rvCurrency = binding.rvCurrency
+        val currencyAdapter = CurrencyAdapter()
+
+        rvCurrency.adapter = currencyAdapter
+        rvCurrency.layoutManager =
+            LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+        rvCurrency.setHasFixedSize(true)
+
         lifecycleScope.launchWhenStarted {
             viewModel.conversion.collect { event ->
                 when (event) {
-                    is PayseraViewModel.CurrencyEvent.Success -> {
+                    is CurrencyViewModel.CurrencyEvent.Success -> {
                         binding.progressBar.isVisible = false
                         binding.tvResultText.setTextColor(Color.GREEN)
                         binding.tvResultText.text = event.resultText
                     }
-                    is PayseraViewModel.CurrencyEvent.Failure -> {
+                    is CurrencyViewModel.CurrencyEvent.Failure -> {
                         binding.progressBar.isVisible = false
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
                     }
-                    is PayseraViewModel.CurrencyEvent.Loading -> {
+                    is CurrencyViewModel.CurrencyEvent.Loading -> {
                         binding.progressBar.isVisible = true
                     }
                     else -> Unit

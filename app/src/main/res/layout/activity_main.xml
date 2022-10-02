@@ -6,12 +6,38 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+  <include
+      android:id="@+id/include"
+      layout="@layout/toolbar_main"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+  <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/title_balance"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="16dp"
+      android:text="@string/tv_balance"
+      app:layout_constraintStart_toStartOf="@+id/include"
+      app:layout_constraintTop_toBottomOf="@+id/include" />
+
+  <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/rv_currency"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:layout_constraintBottom_toTopOf="@+id/tvTitle"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/title_balance" />
+
   <TextView
       android:id="@+id/tvTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
-      android:text="Currency Exchange"
+      android:text="@string/tv_currency_exchange"
       android:textColor="#2C2C2C"
       android:textSize="18sp"
       app:layout_constraintBottom_toTopOf="@+id/guideline"
@@ -22,14 +48,14 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:orientation="horizontal"
-      app:layout_constraintGuide_percent="0.21" />
+      app:layout_constraintGuide_percent="0.37" />
 
   <TextView
       android:id="@+id/tvSell"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
-      android:text="Sell"
+      android:text="@string/tv_text_sell"
       app:layout_constraintBottom_toBottomOf="@+id/ivFromCurrency"
       app:layout_constraintStart_toEndOf="@+id/ivFromCurrency"
       app:layout_constraintTop_toTopOf="@+id/ivFromCurrency" />
@@ -39,7 +65,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
-      android:text="Receive"
+      android:text="@string/tv_text_receive"
       app:layout_constraintBottom_toBottomOf="@+id/ivToCurrency"
       app:layout_constraintStart_toEndOf="@+id/ivToCurrency"
       app:layout_constraintTop_toTopOf="@+id/ivToCurrency" />
@@ -103,7 +129,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="100dp"
-      android:text="Submit"
+      android:text="@string/btn_text_submit"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/spinnerToCurrency" />
