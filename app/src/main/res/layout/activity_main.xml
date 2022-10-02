@@ -1,10 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+  <TextView
+      android:id="@+id/tvTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="Currency Exchange"
+      android:textColor="#2C2C2C"
+      android:textSize="18sp"
+      app:layout_constraintBottom_toTopOf="@+id/guideline"
+      app:layout_constraintStart_toStartOf="parent" />
+
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guideline"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintGuide_percent="0.21" />
+
+  <TextView
+      android:id="@+id/tvSell"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="Sell"
+      app:layout_constraintBottom_toBottomOf="@+id/ivFromCurrency"
+      app:layout_constraintStart_toEndOf="@+id/ivFromCurrency"
+      app:layout_constraintTop_toTopOf="@+id/ivFromCurrency" />
+
+  <TextView
+      android:id="@+id/tvReceive"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="Receive"
+      app:layout_constraintBottom_toBottomOf="@+id/ivToCurrency"
+      app:layout_constraintStart_toEndOf="@+id/ivToCurrency"
+      app:layout_constraintTop_toTopOf="@+id/ivToCurrency" />
+
+  <TextView
+      android:id="@+id/tvResultText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Result"
+      android:textColor="#4CAF50"
+      app:layout_constraintBottom_toBottomOf="@+id/tvReceive"
+      app:layout_constraintEnd_toStartOf="@+id/spinnerToCurrency"
+      app:layout_constraintTop_toTopOf="@+id/tvReceive" />
+
+  <com.google.android.material.textfield.TextInputLayout
+      android:id="@+id/tilFromCurrency"
+      style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="100dp"
+      android:layout_marginEnd="16dp"
+      android:hint="Amount"
+      app:layout_constraintBottom_toBottomOf="@+id/spinnerFromCurrency"
+      app:layout_constraintEnd_toStartOf="@+id/spinnerFromCurrency"
+      app:layout_constraintStart_toEndOf="@+id/tvSell"
+      app:layout_constraintTop_toTopOf="@+id/spinnerFromCurrency">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/etFromCurrency"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:inputType="numberDecimal" />
+
+  </com.google.android.material.textfield.TextInputLayout>
+
+
+  <Spinner
+      android:id="@+id/spinnerFromCurrency"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="16dp"
+      android:entries="@array/currency_code_list"
+      android:padding="15dp"
+      app:layout_constraintBottom_toBottomOf="@+id/tvSell"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/tvSell" />
+
+  <Spinner
+      android:id="@+id/spinnerToCurrency"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="16dp"
+      android:entries="@array/currency_code_list"
+      android:padding="15dp"
+      app:layout_constraintBottom_toBottomOf="@+id/tvReceive"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/tvReceive" />
+
+  <Button
+      android:id="@+id/btnSubmit"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="100dp"
+      android:text="Submit"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/spinnerToCurrency" />
+
+  <ImageView
+      android:id="@+id/ivFromCurrency"
+      android:layout_width="28dp"
+      android:layout_height="28dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="32dp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/guideline"
+      app:srcCompat="@drawable/icon_arrow_sell" />
+
+  <ImageView
+      android:id="@+id/ivToCurrency"
+      android:layout_width="28dp"
+      android:layout_height="28dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="32dp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/ivFromCurrency"
+      app:srcCompat="@drawable/icon_arrow_receive" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
