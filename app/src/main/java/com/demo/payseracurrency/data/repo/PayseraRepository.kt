@@ -6,5 +6,5 @@ import com.demo.payseracurrency.utils.Resource
 
 interface PayseraRepository {
     suspend fun getRates(base: String): Resource<LatestCurrencyResponse>
-    suspend fun getConverted(base: String): Resource<ConvertResponse>
+    suspend fun getConverted(from: String, to: String, amount: Double): Resource<ConvertResponse>
 }

@@ -17,6 +17,6 @@ interface PayseraApi {
     suspend fun getConverted(
         @Query("from") from: String,
         @Query("to") to: String,
-        @Query("from") amount: Double
+        @Query("amount") amount: Double
     ): Response<ConvertResponse>
 }

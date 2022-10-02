@@ -46,12 +46,12 @@
 
   <TextView
       android:id="@+id/tvResultText"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:text="Result"
-      android:textColor="#4CAF50"
+      android:text=""
       app:layout_constraintBottom_toBottomOf="@+id/tvReceive"
       app:layout_constraintEnd_toStartOf="@+id/spinnerToCurrency"
+      app:layout_constraintStart_toStartOf="@+id/tilFromCurrency"
       app:layout_constraintTop_toTopOf="@+id/tvReceive" />
 
   <com.google.android.material.textfield.TextInputLayout
@@ -127,5 +127,15 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/ivFromCurrency"
       app:srcCompat="@drawable/icon_arrow_receive" />
+
+  <ProgressBar
+      android:id="@+id/progressBar"
+      style="?android:attr/progressBarStyle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="invisible"
+      app:layout_constraintBottom_toTopOf="@+id/btnSubmit"
+      app:layout_constraintEnd_toEndOf="@+id/btnSubmit"
+      app:layout_constraintStart_toStartOf="@+id/btnSubmit" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
