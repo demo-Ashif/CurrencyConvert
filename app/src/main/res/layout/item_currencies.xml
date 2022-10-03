@@ -7,19 +7,20 @@
     android:orientation="horizontal">
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/accountBalance"
+        android:id="@+id/tvCurrencyBalance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:textColor="#fff"
         android:text="Account Title"
         tools:text="1000.0 " />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/accountTitle"
+        android:id="@+id/tvCurrencyName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:textColor="#fff"
         tools:text="USD" />
-
 
 </LinearLayout>

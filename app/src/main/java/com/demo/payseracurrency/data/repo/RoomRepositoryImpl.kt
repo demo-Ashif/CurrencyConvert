@@ -1,6 +1,5 @@
 package com.demo.payseracurrency.data.repo
 
-import androidx.lifecycle.LiveData
 import com.demo.payseracurrency.data.room.CurrencyDAO
 import com.demo.payseracurrency.data.room.CurrencyEntity
 import kotlinx.coroutines.Dispatchers
@@ -17,23 +16,23 @@ class RoomRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun checkKey(key: String): Flow<Int> {
+    override fun checkCurrencyByKey(key: String): Flow<Int> {
         return currencyDAO.containsPrimaryKey(key)
     }
 
-    override fun update(currencyEntity: CurrencyEntity) {
+    override suspend fun update(currencyEntity: CurrencyEntity) {
         currencyDAO.update(currencyEntity)
     }
 
-    override fun getAllAccounts(): Flow<List<CurrencyEntity>> {
+    override fun getAllCurrencies(): Flow<List<CurrencyEntity>> {
         return currencyDAO.getAllCurrencies()
     }
 
-    override fun getAccountsById(key: String?): LiveData<CurrencyEntity> {
-        return currencyDAO.getCurrencyById(key)
+    override fun getCurrencyByKey(key: String?): Flow<CurrencyEntity> {
+        return currencyDAO.getCurrencyByKey(key)
     }
 
-    override suspend fun updateSum(key: String, balance: Long) {
+    override suspend fun updateSum(key: String, balance: Double) {
         currencyDAO.updateSum(key, balance)
     }
 

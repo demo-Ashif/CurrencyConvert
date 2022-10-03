@@ -1,9 +1,9 @@
 package com.demo.payseracurrency
 
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: CurrencyViewModel by viewModels()
+    private val currencyAdapter = CurrencyAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnSubmit.setOnClickListener {
-            viewModel.convertCurrency(
+            viewModel.startProcessToConvertCurrency(
                 binding.spinnerFromCurrency.selectedItem.toString(),
                 binding.spinnerToCurrency.selectedItem.toString(),
                 binding.etFromCurrency.text.toString()
@@ -32,13 +33,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         val rvCurrency = binding.rvCurrency
-        val currencyAdapter = CurrencyAdapter()
+
 
         rvCurrency.adapter = currencyAdapter
         rvCurrency.layoutManager =
             LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
         rvCurrency.setHasFixedSize(true)
 
+        viewModel.setInitialCurrency()
+
+        initAllObservers()
+
+
+    }
+
+    private fun initAllObservers() {
         lifecycleScope.launchWhenStarted {
             viewModel.conversion.collect { event ->
                 when (event) {
@@ -58,6 +67,10 @@ class MainActivity : AppCompatActivity() {
                     else -> Unit
                 }
             }
+        }
+
+        viewModel.allCurrencies.observe(this) { items ->
+            currencyAdapter.submitList(items)
         }
     }
 }
