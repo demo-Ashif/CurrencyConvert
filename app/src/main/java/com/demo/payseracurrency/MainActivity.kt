@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnSubmit.setOnClickListener {
-            viewModel.startProcessToConvertCurrency(
+            viewModel.startValidationCheck(
                 binding.spinnerFromCurrency.selectedItem.toString(),
                 binding.spinnerToCurrency.selectedItem.toString(),
                 binding.etFromCurrency.text.toString()
@@ -52,15 +52,33 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.conversionEvent.collect { event ->
                 when (event) {
-                    is CurrencyViewModel.CurrencyConversionEvent.Success -> {
+                    is CurrencyViewModel.CurrencyConversionEvent.ConversionSuccess -> {
                         binding.progressBar.isVisible = false
+                        binding.tvConvertedAmountText.setTextColor(Color.GREEN)
+                        binding.tvConvertedAmountText.text = event.convertedAmount.toString()
+
+                        viewModel.postConversionCalculation(
+                            event.from,
+                            event.to,
+                            event.fromAmount,
+                            event.convertedAmount
+                        )
+                    }
+                    is CurrencyViewModel.CurrencyConversionEvent.PostConversionCalculationDone -> {
+
+                        //show dialog (event.msg)
+
                         binding.tvResultText.setTextColor(Color.GREEN)
                         binding.tvResultText.text = event.resultText
+
                     }
-                    is CurrencyViewModel.CurrencyConversionEvent.Failure -> {
+                    is CurrencyViewModel.CurrencyConversionEvent.ConversionFailure -> {
                         binding.progressBar.isVisible = false
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
+                    }
+                    is CurrencyViewModel.CurrencyConversionEvent.CheckValidationSuccess -> {
+                        viewModel.convertCurrency(event.from, event.to, event.fromAmount)
                     }
                     is CurrencyViewModel.CurrencyConversionEvent.Loading -> {
                         binding.progressBar.isVisible = true
@@ -74,11 +92,15 @@ class MainActivity : AppCompatActivity() {
             viewModel.roomEvent.collect { event ->
                 when (event) {
                     is CurrencyViewModel.RoomDataUpdateEvent.InsertNeeded -> {
-                        Log.d("insert done called", "${event.toString()}")
+//                        Log.d("insert done called", "${event.toString()}")
                         viewModel.getAllCurrencies()
                     }
                     is CurrencyViewModel.RoomDataUpdateEvent.CheckComplete -> {
-                        Log.d("check complete called", "")
+//                        Log.d("check complete called", "")
+                        viewModel.getAllCurrencies()
+                    }
+
+                    is CurrencyViewModel.RoomDataUpdateEvent.RoomDbUpdateDone -> {
                         viewModel.getAllCurrencies()
                     }
                     else -> Unit
@@ -87,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.allCurrencies.observe(this) { items ->
-            Log.d("all items",items.toString())
+            Log.d("all items", items.toString())
             currencyAdapter.setCurrencies(items)
             accountList.clear()
 
