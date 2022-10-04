@@ -15,7 +15,7 @@ interface RoomRepository {
 
     fun getCurrencyByKey(key: String?): Flow<CurrencyEntity>
 
-    suspend fun updateSum(key: String, balance: Double)
+    suspend fun updateSum(key: String, balance: Long)
 
-    suspend fun updateMinus(key: String, balance: Double)
+    suspend fun updateMinus(key: String, balance: Long)
 }

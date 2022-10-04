@@ -32,11 +32,11 @@ class RoomRepositoryImpl @Inject constructor(
         return currencyDAO.getCurrencyByKey(key)
     }
 
-    override suspend fun updateSum(key: String, balance: Double) {
+    override suspend fun updateSum(key: String, balance: Long) {
         currencyDAO.updateSum(key, balance)
     }
 
-    override suspend fun updateMinus(key: String, balance: Double) {
+    override suspend fun updateMinus(key: String, balance: Long) {
         currencyDAO.updateMinus(key, balance)
     }
 

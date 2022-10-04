@@ -2,6 +2,7 @@ package com.demo.payseracurrency
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -17,7 +18,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: CurrencyViewModel by viewModels()
-    private val currencyAdapter = CurrencyAdapter()
+    private var currencyAdapter = CurrencyAdapter()
+    var accountList = ArrayList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,28 +42,27 @@ class MainActivity : AppCompatActivity() {
             LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
         rvCurrency.setHasFixedSize(true)
 
-        viewModel.setInitialCurrency()
 
         initAllObservers()
 
-
+        viewModel.setInitialCurrency()
     }
 
     private fun initAllObservers() {
         lifecycleScope.launchWhenStarted {
-            viewModel.conversion.collect { event ->
+            viewModel.conversionEvent.collect { event ->
                 when (event) {
-                    is CurrencyViewModel.CurrencyEvent.Success -> {
+                    is CurrencyViewModel.CurrencyConversionEvent.Success -> {
                         binding.progressBar.isVisible = false
                         binding.tvResultText.setTextColor(Color.GREEN)
                         binding.tvResultText.text = event.resultText
                     }
-                    is CurrencyViewModel.CurrencyEvent.Failure -> {
+                    is CurrencyViewModel.CurrencyConversionEvent.Failure -> {
                         binding.progressBar.isVisible = false
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
                     }
-                    is CurrencyViewModel.CurrencyEvent.Loading -> {
+                    is CurrencyViewModel.CurrencyConversionEvent.Loading -> {
                         binding.progressBar.isVisible = true
                     }
                     else -> Unit
@@ -69,8 +70,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        lifecycleScope.launchWhenStarted {
+            viewModel.roomEvent.collect { event ->
+                when (event) {
+                    is CurrencyViewModel.RoomDataUpdateEvent.InsertNeeded -> {
+                        Log.d("insert done called", "${event.toString()}")
+                        viewModel.getAllCurrencies()
+                    }
+                    is CurrencyViewModel.RoomDataUpdateEvent.CheckComplete -> {
+                        Log.d("check complete called", "")
+                        viewModel.getAllCurrencies()
+                    }
+                    else -> Unit
+                }
+            }
+        }
+
         viewModel.allCurrencies.observe(this) { items ->
-            currencyAdapter.submitList(items)
+            Log.d("all items",items.toString())
+            currencyAdapter.setCurrencies(items)
+            accountList.clear()
+
+//            // add List<AccountsEntity to List<String> for adapter
+//            for (item in items) {
+//                accountList.add(item.currencyName)
+//            }
         }
     }
 }

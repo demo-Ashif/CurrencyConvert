@@ -22,10 +22,10 @@ interface CurrencyDAO {
     fun containsPrimaryKey(key: String): Flow<Int>
 
     @Query("UPDATE currency_table SET currencyBalance = currencyBalance + :addValue WHERE currencyName =:key")
-    suspend fun updateSum(key : String, addValue: Double)
+    suspend fun updateSum(key : String, addValue: Long)
 
     @Query("UPDATE currency_table SET currencyBalance = currencyBalance - :addValue WHERE currencyName =:key")
-    suspend fun updateMinus(key : String, addValue: Double)
+    suspend fun updateMinus(key : String, addValue: Long)
 
     @Query("SELECT * FROM currency_table WHERE currencyName = :key")
     fun getCurrencyByKey(key: String?): Flow<CurrencyEntity>

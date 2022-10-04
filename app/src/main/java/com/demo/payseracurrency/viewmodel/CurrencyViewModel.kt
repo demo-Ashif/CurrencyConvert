@@ -1,6 +1,7 @@
 package com.demo.payseracurrency.viewmodel
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.*
 import com.demo.payseracurrency.data.repo.CurrencyRepository
 import com.demo.payseracurrency.data.repo.RoomRepository
@@ -9,6 +10,7 @@ import com.demo.payseracurrency.utils.Constants
 import com.demo.payseracurrency.utils.DispatcherProvider
 import com.demo.payseracurrency.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,20 +24,35 @@ class CurrencyViewModel @Inject constructor(
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
 
-    sealed class CurrencyEvent {
-        class Success(val resultText: String) : CurrencyEvent()
-        class Failure(val errorText: String) : CurrencyEvent()
-        object Loading : CurrencyEvent()
-        object Empty : CurrencyEvent()
+    sealed class CurrencyConversionEvent {
+        class Success(val resultText: String) : CurrencyConversionEvent()
+        class Failure(val errorText: String) : CurrencyConversionEvent()
+        object Loading : CurrencyConversionEvent()
+        object Empty : CurrencyConversionEvent()
+
     }
 
-    private val _conversion = MutableStateFlow<CurrencyEvent>(CurrencyEvent.Empty)
-    val conversion: StateFlow<CurrencyEvent> = _conversion
+    sealed class RoomDataUpdateEvent {
+        object InsertNeeded : RoomDataUpdateEvent()
+        object InsertDone : RoomDataUpdateEvent()
+        object UpdateSum : RoomDataUpdateEvent()
+        object UpdateMinus : RoomDataUpdateEvent()
+        object CheckComplete : RoomDataUpdateEvent()
+        object Empty : RoomDataUpdateEvent()
+    }
+
+    private val _conversionEvent =
+        MutableStateFlow<CurrencyConversionEvent>(CurrencyConversionEvent.Empty)
+    val conversionEvent: StateFlow<CurrencyConversionEvent> = _conversionEvent
+
+    private val _roomEvent = MutableStateFlow<RoomDataUpdateEvent>(RoomDataUpdateEvent.Empty)
+    val roomEvent: StateFlow<RoomDataUpdateEvent> = _roomEvent
 
     private val _allCurrencies = MutableLiveData<List<CurrencyEntity>>()
     val allCurrencies: LiveData<List<CurrencyEntity>> = _allCurrencies
 
     fun setInitialCurrency() {
+
         viewModelScope.launch(dispatcher.io) {
             checkAvailableCurrencyByKey("EUR").cancellable().collect { checkStatus ->
                 if (checkStatus != 1) {
@@ -45,15 +62,22 @@ class CurrencyViewModel @Inject constructor(
                             Constants.ACCOUNT_BALANCE
                         )
                     )
+                    //delay(1500)
+                    _roomEvent.value = RoomDataUpdateEvent.InsertNeeded
+                } else {
+                    //delay(1500)
+                    _roomEvent.value = RoomDataUpdateEvent.CheckComplete
                 }
-                getAllCurrencies()
+
             }
         }
     }
 
-    private fun getAllCurrencies() {
+    fun getAllCurrencies() {
+
         viewModelScope.launch {
             roomRepository.getAllCurrencies().collect { item ->
+//                Log.d("all items",item.toString())
                 _allCurrencies.postValue(item)
             }
         }
@@ -71,12 +95,13 @@ class CurrencyViewModel @Inject constructor(
         val fromAmount = amount.toDoubleOrNull()
 
         if (from == to) {
-            _conversion.value = CurrencyEvent.Failure("You are converting same Currency!")
+            _conversionEvent.value =
+                CurrencyConversionEvent.Failure("You are converting same Currency!")
             return
         }
 
         if (fromAmount == null || fromAmount <= 0) {
-            _conversion.value = CurrencyEvent.Failure("Amount is not valid!")
+            _conversionEvent.value = CurrencyConversionEvent.Failure("Amount is not valid!")
             return
         }
 
@@ -84,8 +109,8 @@ class CurrencyViewModel @Inject constructor(
         viewModelScope.launch(dispatcher.io) {
             checkAvailableCurrencyByKey(from).cancellable().collect { checkStatus ->
                 if (checkStatus != 1) {
-                    _conversion.value =
-                        CurrencyEvent.Failure("You don't have any balance in selected currency!")
+                    _conversionEvent.value =
+                        CurrencyConversionEvent.Failure("You don't have any balance in selected currency!")
                 } else {
                     getCurrencyByKey(from).cancellable().collect() { currencyEntity ->
                         checkAvailableBalanceAndConvert(currencyEntity, from, to, fromAmount)
@@ -105,20 +130,20 @@ class CurrencyViewModel @Inject constructor(
 
         //check available balance first
         if (currencyEntity.currencyBalance < fromAmount) {
-            _conversion.value =
-                CurrencyEvent.Failure("Insufficient balance!")
+            _conversionEvent.value =
+                CurrencyConversionEvent.Failure("Insufficient balance!")
             return
         }
 
         viewModelScope.launch(dispatcher.io) {
-            _conversion.value = CurrencyEvent.Loading
+            _conversionEvent.value = CurrencyConversionEvent.Loading
             when (val convertResponse = repository.getConverted(from, to, fromAmount)) {
-                is Resource.Error -> _conversion.value =
-                    CurrencyEvent.Failure(convertResponse.message!!)
+                is Resource.Error -> _conversionEvent.value =
+                    CurrencyConversionEvent.Failure(convertResponse.message!!)
                 is Resource.Success -> {
                     val currencyConvertData = convertResponse.data
                     if (currencyConvertData == null) {
-                        _conversion.value = CurrencyEvent.Failure("Unexpected error")
+                        _conversionEvent.value = CurrencyConversionEvent.Failure("Unexpected error")
                     } else {
                         val convertedCurrencyAmount = getTwoDecimalPoint(currencyConvertData.result)
 
@@ -164,10 +189,9 @@ class CurrencyViewModel @Inject constructor(
                         to,
                         convertedCurrencyAmount
                     )
-
-                    //get all currencies to show in listview
-                    getAllCurrencies()
                 }
+
+                //getAllCurrencies()
             }
         }
 
@@ -185,17 +209,17 @@ class CurrencyViewModel @Inject constructor(
         if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) {
             updateMinus(from, fromAmount)
             //conversion success message
-            _conversion.value = CurrencyEvent.Success(
+            _conversionEvent.value = CurrencyConversionEvent.Success(
                 "$fromAmount $from = $convertedCurrencyAmount $to"
             )
         } else {
             commission = getTwoDecimalPoint((fromAmount * 0.7) / 100.0)
+            updateMinus(from, (fromAmount + commission))
             //conversion success message
-            _conversion.value = CurrencyEvent.Success(
+            _conversionEvent.value = CurrencyConversionEvent.Success(
                 "$fromAmount $from = $convertedCurrencyAmount $to - Commission: $commission $from"
             )
         }
-
     }
 
     private fun getTwoDecimalPoint(amount: Double): Double {
@@ -213,7 +237,7 @@ class CurrencyViewModel @Inject constructor(
     }
 
 
-    private fun insert(currencyEntity: CurrencyEntity) {
+     fun insert(currencyEntity: CurrencyEntity) {
         viewModelScope.launch {
             roomRepository.insert(currencyEntity)
         }
@@ -227,13 +251,13 @@ class CurrencyViewModel @Inject constructor(
 
     private fun updateSum(key: String, balance: Double) {
         viewModelScope.launch {
-            roomRepository.updateSum(key, balance)
+            roomRepository.updateSum(key, balance.toLong())
         }
     }
 
     private fun updateMinus(key: String, balance: Double) {
         viewModelScope.launch {
-            roomRepository.updateMinus(key, balance)
+            roomRepository.updateMinus(key, balance.toLong())
         }
     }
 
