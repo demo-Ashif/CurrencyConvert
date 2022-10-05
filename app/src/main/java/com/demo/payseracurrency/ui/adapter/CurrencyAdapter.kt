@@ -17,7 +17,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
         var currencyBalance = itemView.findViewById<View>(R.id.tvCurrencyName) as TextView
 
         fun bind(item : CurrencyEntity){
-            currencyName.text = item.currencyBalance.toString()
+            currencyName.text = String.format("%.2f", item.currencyBalance)
             currencyBalance.text = item.currencyName
         }
     }

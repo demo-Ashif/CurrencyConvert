@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.payseracurrency.data.room.CurrencyEntity
 import com.demo.payseracurrency.databinding.ActivityMainBinding
 import com.demo.payseracurrency.ui.adapter.CurrencyAdapter
+import com.demo.payseracurrency.ui.views.CustomDialog.Companion.showSuccessDialog
 import com.demo.payseracurrency.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
@@ -39,11 +40,6 @@ class MainActivity : AppCompatActivity() {
                 binding.spinnerToCurrency.selectedItem.toString(),
                 binding.etFromCurrency.text.toString()
             )
-//            viewModel.convertCurrency(
-//                binding.spinnerFromCurrency.selectedItem.toString(),
-//                binding.spinnerToCurrency.selectedItem.toString(),
-//                binding.etFromCurrency.text.toString().toDouble()
-//            )
         }
 
         val rvCurrency = binding.rvCurrency
@@ -59,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.setInitialCurrency()
 
-        //viewModel.getLatestRates()
+        viewModel.getLatestRates()
     }
 
     private fun initAllObservers() {
@@ -69,12 +65,14 @@ class MainActivity : AppCompatActivity() {
 
                     is CurrencyViewModel.CurrencyConversionEvent.ConversionFailure -> {
                         binding.progressBar.isVisible = false
+
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
                     }
                     is CurrencyViewModel.CurrencyConversionEvent.CheckValidationSuccess -> {
-                        binding.tvResultText.setTextColor(Color.GREEN)
-                        binding.tvResultText.text = "All validation success before converting!"
+                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
+                        binding.tvResultText.text = ""
+                        //binding.tvResultText.text = "All validation success before converting!"
                         viewModel.convertCurrency(event.from, event.to, event.fromAmount)
                     }
 
@@ -86,6 +84,19 @@ class MainActivity : AppCompatActivity() {
                         binding.progressBar.isVisible = false
                         binding.tvConvertedAmountText.setTextColor(Color.GREEN)
                         binding.tvConvertedAmountText.text = event.successMsg
+
+                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
+                        binding.tvResultText.text = ""
+
+                        binding.etFromCurrency.text?.clear()
+
+                        //show Dialog for conversion success message with commission
+                        showSuccessDialog(
+                            this@MainActivity,
+                            """${event.fromAmount}${" "}${event.from}""",
+                            """${event.convertedAmount}${" "}${event.to}""",
+                            String.format("%.2f", event.commission)
+                        )
 
                         viewModel.roomDbUpdateData(
                             event.from,

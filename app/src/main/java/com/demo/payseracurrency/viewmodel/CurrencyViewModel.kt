@@ -2,9 +2,10 @@ package com.demo.payseracurrency.viewmodel
 
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.databinding.ObservableDouble
-import androidx.lifecycle.*
-import com.demo.payseracurrency.data.models.ConvertResponse
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.demo.payseracurrency.data.repo.CurrencyRepository
 import com.demo.payseracurrency.data.repo.RoomRepository
 import com.demo.payseracurrency.data.room.CurrencyEntity
@@ -13,8 +14,8 @@ import com.demo.payseracurrency.utils.Constants
 import com.demo.payseracurrency.utils.DispatcherProvider
 import com.demo.payseracurrency.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.round
@@ -93,7 +94,7 @@ class CurrencyViewModel @Inject constructor(
         viewModelScope.launch(dispatcher.io) {
             val checkStatus = checkAvailableCurrencyByKey("EUR")
             if (checkStatus != 1) {
-                roomRepository.insert(
+                insert(
                     CurrencyEntity(
                         Constants.DEFAULT_ACCOUNT,
                         Constants.ACCOUNT_BALANCE
@@ -157,10 +158,11 @@ class CurrencyViewModel @Inject constructor(
     }
 
     fun convertCurrency(from: String, to: String, fromAmount: Double) {
-        viewModelScope.launch(dispatcher.io) {
-            _conversionEvent.value = CurrencyConversionEvent.Loading
 
-            viewModelScope.launch {
+        _conversionEvent.value = CurrencyConversionEvent.Loading
+
+        viewModelScope.launch {
+            try {
                 val fromLatestRate = getCurrencyRateByKey(from)
                 val toLatestRate = getCurrencyRateByKey(to)
 
@@ -170,6 +172,7 @@ class CurrencyViewModel @Inject constructor(
                     fromAmount
                 )
 
+
                 saveExchangeCount()
 
                 val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
@@ -177,12 +180,18 @@ class CurrencyViewModel @Inject constructor(
                 val commission =
                     if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) 0.0 else fromAmount * (0.7 / 100.0)
 
+                val conversionMsg = "+$convertedAmount"
+
                 _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
-                    "msg", from, fromAmount, to, convertedAmount, commission
+                    conversionMsg, from, fromAmount, to, convertedAmount, commission
                 )
 
+            } catch (e: Exception) {
+                _conversionEvent.value =
+                    CurrencyConversionEvent.ConversionFailure("Something went wrong. Conversion failed!")
             }
         }
+
     }
 
     private fun getTwoDecimalConvertedAmount(
@@ -190,10 +199,7 @@ class CurrencyViewModel @Inject constructor(
         toLatestRate: Double,
         fromAmount: Double
     ): Double {
-        Log.d(
-            TAG,
-            "called getTwoDecimalConvertedAmount: fromLatestRate: $fromLatestRate, toLatestRate:$toLatestRate fromAmount: $fromAmount"
-        )
+
         val convertedAmount = (toLatestRate / fromLatestRate) * fromAmount
         return round((convertedAmount * 100.0)) / 100.0
     }
@@ -208,7 +214,7 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
-    suspend fun checkAvailableCurrencyByKey(key: String): Int {
+    private suspend fun checkAvailableCurrencyByKey(key: String): Int {
         return roomRepository.checkCurrencyByKey(key)
     }
 
@@ -232,23 +238,15 @@ class CurrencyViewModel @Inject constructor(
     ) {
         viewModelScope.launch(dispatcher.io) {
             val checkStatus = checkAvailableCurrencyByKey(to)
+            val fromAmountWithCommission = (fromAmount + commission)
+            Log.d(TAG, "fromAmountWithCommission: $fromAmountWithCommission")
 
             if (checkStatus == 1) {
-                updateMinus(
-                    from,
-                    (fromAmount + commission)
-                )
-                updateSum(
-                    to,
-                    convertedAmount
-                )
-
+                updateMinus(from, fromAmountWithCommission)
+                updateSum(to, convertedAmount)
 
             } else {
-                updateMinus(
-                    from,
-                    (fromAmount + commission)
-                )
+                updateMinus(from, fromAmountWithCommission)
                 val currencyEntity =
                     CurrencyEntity(
                         currencyName = to,
@@ -264,22 +262,16 @@ class CurrencyViewModel @Inject constructor(
 
     }
 
-    private fun insert(currencyEntity: CurrencyEntity) {
-        viewModelScope.launch {
-            roomRepository.insert(currencyEntity)
-        }
+    private suspend fun insert(currencyEntity: CurrencyEntity) {
+        roomRepository.insert(currencyEntity)
     }
 
-    private fun updateSum(key: String, balance: Double) {
-        viewModelScope.launch {
-            roomRepository.updateSum(key, balance.toLong())
-        }
+    private suspend fun updateSum(key: String, balance: Double) {
+        roomRepository.updateSum(key, balance.toLong())
     }
 
-    private fun updateMinus(key: String, balance: Double) {
-        viewModelScope.launch {
-            roomRepository.updateMinus(key, balance.toLong())
-        }
+    private suspend fun updateMinus(key: String, balance: Double) {
+        roomRepository.updateMinus(key, balance.toLong())
     }
 
     private suspend fun getCurrencyByKey(key: String?): CurrencyEntity {

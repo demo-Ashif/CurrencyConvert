@@ -6,6 +6,7 @@
     <string name="tv_dialog_message">You have converted %1$s to %2$s  \n Commission fee %3$s.</string>
     <string name="tv_text_sell">Sell</string>
     <string name="tv_text_receive">Receive</string>
+    <string name="tv_dialog_title">Currency Converter</string>
 
 
     <string-array name="currency_code_list">
