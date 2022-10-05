@@ -239,7 +239,7 @@ class CurrencyViewModel @Inject constructor(
         viewModelScope.launch(dispatcher.io) {
             val checkStatus = checkAvailableCurrencyByKey(to)
             val fromAmountWithCommission = (fromAmount + commission)
-            Log.d(TAG, "fromAmountWithCommission: $fromAmountWithCommission")
+
 
             if (checkStatus == 1) {
                 updateMinus(from, fromAmountWithCommission)
@@ -267,11 +267,13 @@ class CurrencyViewModel @Inject constructor(
     }
 
     private suspend fun updateSum(key: String, balance: Double) {
-        roomRepository.updateSum(key, balance.toLong())
+        roomRepository.updateSum(key, balance)
     }
 
     private suspend fun updateMinus(key: String, balance: Double) {
-        roomRepository.updateMinus(key, balance.toLong())
+//        Log.d(TAG, "fromAmountWithCommission: $balance")
+//        Log.d(TAG, "fromAmountWithCommission toLong: ${balance.toLong()}")
+        roomRepository.updateMinus(key, balance)
     }
 
     private suspend fun getCurrencyByKey(key: String?): CurrencyEntity {

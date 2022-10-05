@@ -24,10 +24,10 @@ interface CurrencyDAO {
     suspend fun containsPrimaryKey(key: String): Int
 
     @Query("UPDATE currency_table SET currencyBalance = currencyBalance + :addValue WHERE currencyName =:key")
-    suspend fun updateSum(key : String, addValue: Long)
+    suspend fun updateSum(key : String, addValue: Double)
 
     @Query("UPDATE currency_table SET currencyBalance = currencyBalance - :addValue WHERE currencyName =:key")
-    suspend fun updateMinus(key : String, addValue: Long)
+    suspend fun updateMinus(key : String, addValue: Double)
 
     @Query("SELECT * FROM currency_table WHERE currencyName = :key")
     suspend fun getCurrencyByKey(key: String?): CurrencyEntity

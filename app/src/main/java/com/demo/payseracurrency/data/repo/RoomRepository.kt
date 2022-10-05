@@ -17,9 +17,9 @@ interface RoomRepository {
 
     suspend fun getCurrencyByKey(key: String?): CurrencyEntity
 
-    suspend fun updateSum(key: String, balance: Long)
+    suspend fun updateSum(key: String, balance: Double)
 
-    suspend fun updateMinus(key: String, balance: Long)
+    suspend fun updateMinus(key: String, balance: Double)
 
     //latest rate
     suspend fun insertRate(rateEntity: LatestRateEntity)
