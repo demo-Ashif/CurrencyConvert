@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Currency Exchange</string>
+    <string name="app_name">Currency Convert</string>
     <string name="tv_balance">My Balances</string>
     <string name="tv_currency_exchange">CURRENCY EXCHANGE</string>
     <string name="btn_text_submit">Submit</string>
