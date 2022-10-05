@@ -1,11 +1,13 @@
 package com.demo.payseracurrency.viewmodel
 
 import android.content.SharedPreferences
-import android.util.Log
+import android.database.Observable
+import androidx.databinding.ObservableDouble
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.demo.payseracurrency.data.models.ConvertResponse
 import com.demo.payseracurrency.data.repo.CurrencyRepository
 import com.demo.payseracurrency.data.repo.RoomRepository
 import com.demo.payseracurrency.data.room.CurrencyEntity
@@ -40,19 +42,20 @@ class CurrencyViewModel @Inject constructor(
         object Loading : CurrencyConversionEvent()
         object Empty : CurrencyConversionEvent()
         class ConversionSuccess(
-            val from: String,
-            val to: String,
-            val fromAmount: Double,
-            val convertedAmount: Double
+            val convertResponse: ConvertResponse
         ) : CurrencyConversionEvent()
 
-        class PostConversionCalculationDone(val resultText: String) : CurrencyConversionEvent()
+        class PostConversionCalculationDone(
+            val convertResponse: ConvertResponse,
+            val commission: Double
+        ) : CurrencyConversionEvent()
 
     }
 
     sealed class RoomDataUpdateEvent {
         object InsertNeeded : RoomDataUpdateEvent()
-        object RoomDbUpdateDone : RoomDataUpdateEvent()
+
+        //object RoomDbUpdateDone : RoomDataUpdateEvent()
         object CheckComplete : RoomDataUpdateEvent()
         object Empty : RoomDataUpdateEvent()
     }
@@ -66,6 +69,9 @@ class CurrencyViewModel @Inject constructor(
 
     private val _allCurrencies = MutableLiveData<List<CurrencyEntity>>()
     val allCurrencies: LiveData<List<CurrencyEntity>> = _allCurrencies
+
+    private val _convertResponse = MutableLiveData<ConvertResponse>()
+    val convertResponse: LiveData<ConvertResponse> = _convertResponse
 
     fun setInitialCurrency() {
 
@@ -86,13 +92,8 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
-    fun getAllCurrencies() {
-        viewModelScope.launch {
-            roomRepository.getAllCurrencies().collect { item ->
-                _allCurrencies.postValue(item)
-            }
-        }
-    }
+    val commission = ObservableDouble(0.0)
+
 
     /**
     1. check user given input is valid primarily
@@ -111,7 +112,7 @@ class CurrencyViewModel @Inject constructor(
             return
         }
 
-        if (fromAmount == null || fromAmount <= 0) {
+        if ((fromAmount == null) || (fromAmount <= 0)) {
             _conversionEvent.value =
                 CurrencyConversionEvent.ConversionFailure("Amount is not valid!")
             return
@@ -124,7 +125,7 @@ class CurrencyViewModel @Inject constructor(
                     _conversionEvent.value =
                         CurrencyConversionEvent.ConversionFailure("Selected currency unavailable to sell!")
                 } else {
-                    getCurrencyByKey(from).cancellable().collect() { currencyEntity ->
+                    getCurrencyByKey(from).cancellable().collect { currencyEntity ->
                         checkAvailableBalanceToSell(currencyEntity, from, to, fromAmount)
                     }
                 }
@@ -159,14 +160,14 @@ class CurrencyViewModel @Inject constructor(
                     CurrencyConversionEvent.ConversionFailure(convertResponse.message!!)
                 is Resource.Success -> {
                     val currencyConvertData = convertResponse.data
-                    if (currencyConvertData == null) {
+                    if (currencyConvertData != null) {
+                        _convertResponse.postValue(currencyConvertData!!)
+//                        _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
+//                            currencyConvertData
+//                        )
+                    } else {
                         _conversionEvent.value =
                             CurrencyConversionEvent.ConversionFailure("Unexpected error")
-                    } else {
-                        val convertedCurrencyAmount = getTwoDecimalPoint(currencyConvertData.result)
-                        _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
-                            from, to, fromAmount, convertedCurrencyAmount
-                        )
                     }
                 }
             }
@@ -175,64 +176,19 @@ class CurrencyViewModel @Inject constructor(
 
 
     fun postConversionCalculation(
-        from: String,
-        to: String,
-        fromAmount: Double,
-        convertedCurrencyAmount: Double
+        convertResponse: ConvertResponse,
     ) {
         // update conversion number count
         saveExchangeCount()
 
-
         val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
-        var commission: Double = 0.0
 
-        Log.d(TAG,"total conversion: $totalNumber")
+        val commission =
+            if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) 0.0 else convertResponse.query.amount * (0.7 / 100.0)
 
-        if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) {
-            _conversionEvent.value = CurrencyConversionEvent.PostConversionCalculationDone(
-                "$fromAmount $from = $convertedCurrencyAmount $to"
-            )
-        } else {
-            // commission applied
-            commission = getTwoDecimalPoint((fromAmount * 0.7) / 100.0)
-            _conversionEvent.value = CurrencyConversionEvent.PostConversionCalculationDone(
-                "$fromAmount $from = $convertedCurrencyAmount $to - Commission: $commission $from"
-            )
-        }
-
-        //update user currencies in room db
-        //updateRoomDb(from, fromAmount, to, convertedCurrencyAmount, commission)
-    }
-
-    private fun updateRoomDb(
-        from: String,
-        fromAmount: Double,
-        to: String,
-        convertedCurrencyAmount: Double,
-        commission: Double
-    ) {
-
-        // update fromCurrency
-        updateMinus(from, (fromAmount + commission))
-
-        val currencyEntity =
-            CurrencyEntity(currencyName = to, currencyBalance = convertedCurrencyAmount)
-
-        // check toCurrency available to insert/update
-        viewModelScope.launch(dispatcher.io) {
-            checkAvailableCurrencyByKey(to).cancellable().collect { checkStatus ->
-                if (checkStatus != 1) {
-                    //new value: insert toCurrency
-                    insert(currencyEntity)
-                } else {
-                    //existing value: update toCurrency
-                    updateSum(to, convertedCurrencyAmount)
-                }
-
-                _roomEvent.value = RoomDataUpdateEvent.RoomDbUpdateDone
-            }
-        }
+        _conversionEvent.value = CurrencyConversionEvent.PostConversionCalculationDone(
+            convertResponse, commission
+        )
     }
 
     private fun getTwoDecimalPoint(amount: Double): Double {
@@ -249,24 +205,31 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
-    private fun checkAvailableCurrencyByKey(key: String): Flow<Int> {
+    fun checkAvailableCurrencyByKey(key: String): Flow<Int> {
         return roomRepository.checkCurrencyByKey(key)
     }
 
+    fun getAllCurrencies() {
+        viewModelScope.launch(dispatcher.io) {
+            roomRepository.getAllCurrencies().collect { item ->
+                _allCurrencies.postValue(item)
+            }
+        }
+    }
 
-    private fun insert(currencyEntity: CurrencyEntity) {
+    fun insert(currencyEntity: CurrencyEntity) {
         viewModelScope.launch {
             roomRepository.insert(currencyEntity)
         }
     }
 
-    private fun updateSum(key: String, balance: Double) {
+    fun updateSum(key: String, balance: Double) {
         viewModelScope.launch {
             roomRepository.updateSum(key, balance.toLong())
         }
     }
 
-    private fun updateMinus(key: String, balance: Double) {
+    fun updateMinus(key: String, balance: Double) {
         viewModelScope.launch {
             roomRepository.updateMinus(key, balance.toLong())
         }
