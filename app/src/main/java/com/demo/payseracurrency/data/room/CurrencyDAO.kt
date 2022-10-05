@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CurrencyDAO {
+
+    // user currency
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(currency: CurrencyEntity)
 
@@ -16,10 +18,10 @@ interface CurrencyDAO {
     suspend fun delete(currencies: CurrencyEntity)
 
     @Query("SELECT * FROM currency_table")
-    fun getAllCurrencies(): Flow<List<CurrencyEntity>>
+    suspend fun getAllCurrencies(): List<CurrencyEntity>
 
     @Query("SELECT count(*) FROM currency_table WHERE currencyName = :key ")
-    fun containsPrimaryKey(key: String): Flow<Int>
+    suspend fun containsPrimaryKey(key: String): Int
 
     @Query("UPDATE currency_table SET currencyBalance = currencyBalance + :addValue WHERE currencyName =:key")
     suspend fun updateSum(key : String, addValue: Long)
@@ -28,5 +30,13 @@ interface CurrencyDAO {
     suspend fun updateMinus(key : String, addValue: Long)
 
     @Query("SELECT * FROM currency_table WHERE currencyName = :key")
-    fun getCurrencyByKey(key: String?): Flow<CurrencyEntity>
+    suspend fun getCurrencyByKey(key: String?): CurrencyEntity
+
+    // latest currency rates
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRate(rateEntity: LatestRateEntity)
+
+    @Query("SELECT * FROM latest_rates_table WHERE currencyName = :key")
+    suspend fun getLatestRateByKey(key: String?): LatestRateEntity
+
 }

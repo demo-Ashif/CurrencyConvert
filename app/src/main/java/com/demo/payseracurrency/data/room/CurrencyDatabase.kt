@@ -4,8 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.demo.payseracurrency.utils.Constants
 
-@Database(entities = [CurrencyEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [CurrencyEntity::class, LatestRateEntity::class],
+    version = 2,
+    exportSchema = false
+)
 abstract class CurrencyDatabase : RoomDatabase() {
 
     abstract fun currencyDao(): CurrencyDAO
@@ -19,7 +24,8 @@ abstract class CurrencyDatabase : RoomDatabase() {
                 null -> synchronized(this) {
                     Room.databaseBuilder(
                         context.applicationContext, CurrencyDatabase::class.java,
-                        "accounts_database")
+                        Constants.DB_NAME
+                    )
                         .fallbackToDestructiveMigration()
                         .build()
                 }

@@ -10,9 +10,9 @@ class CurrencyRepositoryImpl @Inject constructor(
     private val api: CurrencyApi
 ) : CurrencyRepository {
 
-    override suspend fun getRates(base: String): Resource<LatestCurrencyResponse> {
+    override suspend fun getRates(): Resource<LatestCurrencyResponse> {
         return try {
-            val response = api.getRates(base)
+            val response = api.getRates("EUR")
             val result = response.body()
             if (response.isSuccessful && result != null) {
                 Resource.Success(result)

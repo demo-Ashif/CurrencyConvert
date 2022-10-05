@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class LatestCurrencyResponse(
     val base: String,
     val date: String,
-    val rates: Rates,
+    val rates: Map<String,Double>,
     val success: Boolean,
     val timestamp: Int
 )
@@ -105,7 +105,7 @@ data class Rates(
     @SerializedName("ETB")
     val ETB: Double,
     @SerializedName("EUR")
-    val EUR: Int,
+    val EUR: Double,
     @SerializedName("FJD")
     val FJD: Double,
     @SerializedName("FKP")

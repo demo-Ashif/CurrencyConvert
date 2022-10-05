@@ -1,27 +1,23 @@
 package com.demo.payseracurrency.viewmodel
 
 import android.content.SharedPreferences
-import android.database.Observable
+import android.util.Log
 import androidx.databinding.ObservableDouble
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.demo.payseracurrency.data.models.ConvertResponse
 import com.demo.payseracurrency.data.repo.CurrencyRepository
 import com.demo.payseracurrency.data.repo.RoomRepository
 import com.demo.payseracurrency.data.room.CurrencyEntity
+import com.demo.payseracurrency.data.room.LatestRateEntity
 import com.demo.payseracurrency.utils.Constants
 import com.demo.payseracurrency.utils.DispatcherProvider
 import com.demo.payseracurrency.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
+import kotlin.math.round
 
 @HiltViewModel
 class CurrencyViewModel @Inject constructor(
@@ -32,21 +28,24 @@ class CurrencyViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val TAG = CurrencyViewModel::class.simpleName
-    //Log.d(TAG,item.toString())
 
     sealed class CurrencyConversionEvent {
-        class CheckValidationSuccess(val from: String, val to: String, val fromAmount: Double) :
-            CurrencyConversionEvent()
-
-        class ConversionFailure(val errorText: String) : CurrencyConversionEvent()
         object Loading : CurrencyConversionEvent()
         object Empty : CurrencyConversionEvent()
-        class ConversionSuccess(
-            val convertResponse: ConvertResponse
+        class ConversionFailure(val errorText: String) : CurrencyConversionEvent()
+
+        class CheckValidationSuccess(
+            val from: String,
+            val to: String,
+            val fromAmount: Double
         ) : CurrencyConversionEvent()
 
-        class PostConversionCalculationDone(
-            val convertResponse: ConvertResponse,
+        class ConversionSuccess(
+            val successMsg: String,
+            val from: String,
+            val fromAmount: Double,
+            val to: String,
+            val convertedAmount: Double,
             val commission: Double
         ) : CurrencyConversionEvent()
 
@@ -68,43 +67,56 @@ class CurrencyViewModel @Inject constructor(
     val roomEvent: StateFlow<RoomDataUpdateEvent> = _roomEvent
 
     private val _allCurrencies = MutableLiveData<List<CurrencyEntity>>()
-    val allCurrencies: LiveData<List<CurrencyEntity>> = _allCurrencies
+    val allCurrencies: LiveData<List<CurrencyEntity>> = _allCurrencies//
 
-    private val _convertResponse = MutableLiveData<ConvertResponse>()
-    val convertResponse: LiveData<ConvertResponse> = _convertResponse
-
-    fun setInitialCurrency() {
-
+    fun getLatestRates() {
         viewModelScope.launch(dispatcher.io) {
-            checkAvailableCurrencyByKey("EUR").cancellable().collect { checkStatus ->
-                if (checkStatus != 1) {
-                    roomRepository.insert(
-                        CurrencyEntity(
-                            Constants.DEFAULT_ACCOUNT,
-                            Constants.ACCOUNT_BALANCE
-                        )
-                    )
-                    _roomEvent.value = RoomDataUpdateEvent.InsertNeeded
-                } else {
-                    _roomEvent.value = RoomDataUpdateEvent.CheckComplete
+
+            when (val latestRatesResponse = repository.getRates()) {
+                is Resource.Error -> _conversionEvent.value =
+                    CurrencyConversionEvent.ConversionFailure(latestRatesResponse.message!!)
+                is Resource.Success -> {
+                    val latestRates = latestRatesResponse.data
+                    if (latestRates != null) {
+                        for (item in latestRates.rates) {
+                            val insertRateEntity = LatestRateEntity(item.key, item.value)
+                            insertRate(insertRateEntity)
+                        }
+                    }
                 }
             }
         }
     }
 
-    val commission = ObservableDouble(0.0)
 
+    fun setInitialCurrency() {
+        viewModelScope.launch(dispatcher.io) {
+            val checkStatus = checkAvailableCurrencyByKey("EUR")
+            if (checkStatus != 1) {
+                roomRepository.insert(
+                    CurrencyEntity(
+                        Constants.DEFAULT_ACCOUNT,
+                        Constants.ACCOUNT_BALANCE
+                    )
+                )
+                _roomEvent.value = RoomDataUpdateEvent.InsertNeeded
+            } else {
+                _roomEvent.value = RoomDataUpdateEvent.CheckComplete
+            }
+        }
+    }
 
-    /**
-    1. check user given input is valid primarily
-    2. check user have the currency and available balance
-    3. convert the amount
-    4. insert as new currency if not present or update existing currency balance
-    5. update shared pref value for number of exchange
-    6. deduct commission if applied and update all balances */
+    //val commission = ObservableDouble(0.0)
+
 
     fun startValidationCheck(from: String, to: String, amount: String) {
         val fromAmount = amount.toDoubleOrNull()
+
+        if (from.isEmpty()) {
+            _conversionEvent.value =
+                CurrencyConversionEvent.ConversionFailure("Select correct currency!")
+            return
+        }
 
         if (from == to) {
             _conversionEvent.value =
@@ -118,18 +130,10 @@ class CurrencyViewModel @Inject constructor(
             return
         }
 
-        //check user has the fromCurrency and available balance
+        //check user has the available balance in from currency
         viewModelScope.launch(dispatcher.io) {
-            checkAvailableCurrencyByKey(from).cancellable().collect { checkStatus ->
-                if (checkStatus != 1) {
-                    _conversionEvent.value =
-                        CurrencyConversionEvent.ConversionFailure("Selected currency unavailable to sell!")
-                } else {
-                    getCurrencyByKey(from).cancellable().collect { currencyEntity ->
-                        checkAvailableBalanceToSell(currencyEntity, from, to, fromAmount)
-                    }
-                }
-            }
+            val currencyEntity = getCurrencyByKey(from)
+            checkAvailableBalanceToSell(currencyEntity, from, to, fromAmount)
         }
     }
 
@@ -155,44 +159,43 @@ class CurrencyViewModel @Inject constructor(
     fun convertCurrency(from: String, to: String, fromAmount: Double) {
         viewModelScope.launch(dispatcher.io) {
             _conversionEvent.value = CurrencyConversionEvent.Loading
-            when (val convertResponse = repository.getConverted(from, to, fromAmount)) {
-                is Resource.Error -> _conversionEvent.value =
-                    CurrencyConversionEvent.ConversionFailure(convertResponse.message!!)
-                is Resource.Success -> {
-                    val currencyConvertData = convertResponse.data
-                    if (currencyConvertData != null) {
-                        _convertResponse.postValue(currencyConvertData!!)
-//                        _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
-//                            currencyConvertData
-//                        )
-                    } else {
-                        _conversionEvent.value =
-                            CurrencyConversionEvent.ConversionFailure("Unexpected error")
-                    }
-                }
+
+            viewModelScope.launch {
+                val fromLatestRate = getCurrencyRateByKey(from)
+                val toLatestRate = getCurrencyRateByKey(to)
+
+                val convertedAmount = getTwoDecimalConvertedAmount(
+                    fromLatestRate.conversionRate,
+                    toLatestRate.conversionRate,
+                    fromAmount
+                )
+
+                saveExchangeCount()
+
+                val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
+
+                val commission =
+                    if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) 0.0 else fromAmount * (0.7 / 100.0)
+
+                _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
+                    "msg", from, fromAmount, to, convertedAmount, commission
+                )
+
             }
         }
     }
 
-
-    fun postConversionCalculation(
-        convertResponse: ConvertResponse,
-    ) {
-        // update conversion number count
-        saveExchangeCount()
-
-        val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
-
-        val commission =
-            if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) 0.0 else convertResponse.query.amount * (0.7 / 100.0)
-
-        _conversionEvent.value = CurrencyConversionEvent.PostConversionCalculationDone(
-            convertResponse, commission
+    private fun getTwoDecimalConvertedAmount(
+        fromLatestRate: Double,
+        toLatestRate: Double,
+        fromAmount: Double
+    ): Double {
+        Log.d(
+            TAG,
+            "called getTwoDecimalConvertedAmount: fromLatestRate: $fromLatestRate, toLatestRate:$toLatestRate fromAmount: $fromAmount"
         )
-    }
-
-    private fun getTwoDecimalPoint(amount: Double): Double {
-        return (amount * 100.0).roundToInt() / 100.0
+        val convertedAmount = (toLatestRate / fromLatestRate) * fromAmount
+        return round((convertedAmount * 100.0)) / 100.0
     }
 
 
@@ -205,38 +208,92 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
-    fun checkAvailableCurrencyByKey(key: String): Flow<Int> {
+    suspend fun checkAvailableCurrencyByKey(key: String): Int {
         return roomRepository.checkCurrencyByKey(key)
     }
 
     fun getAllCurrencies() {
         viewModelScope.launch(dispatcher.io) {
-            roomRepository.getAllCurrencies().collect { item ->
-                _allCurrencies.postValue(item)
+            try {
+                val allCurrenciesFromDb = roomRepository.getAllCurrencies()
+                _allCurrencies.postValue(allCurrenciesFromDb)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error: ${e.message}")
             }
         }
     }
 
-    fun insert(currencyEntity: CurrencyEntity) {
+    fun roomDbUpdateData(
+        from: String,
+        fromAmount: Double,
+        to: String,
+        convertedAmount: Double,
+        commission: Double
+    ) {
+        viewModelScope.launch(dispatcher.io) {
+            val checkStatus = checkAvailableCurrencyByKey(to)
+
+            if (checkStatus == 1) {
+                updateMinus(
+                    from,
+                    (fromAmount + commission)
+                )
+                updateSum(
+                    to,
+                    convertedAmount
+                )
+
+
+            } else {
+                updateMinus(
+                    from,
+                    (fromAmount + commission)
+                )
+                val currencyEntity =
+                    CurrencyEntity(
+                        currencyName = to,
+                        currencyBalance = convertedAmount
+                    )
+
+                insert(currencyEntity)
+            }
+            getAllCurrencies()
+
+        }
+
+
+    }
+
+    private fun insert(currencyEntity: CurrencyEntity) {
         viewModelScope.launch {
             roomRepository.insert(currencyEntity)
         }
     }
 
-    fun updateSum(key: String, balance: Double) {
+    private fun updateSum(key: String, balance: Double) {
         viewModelScope.launch {
             roomRepository.updateSum(key, balance.toLong())
         }
     }
 
-    fun updateMinus(key: String, balance: Double) {
+    private fun updateMinus(key: String, balance: Double) {
         viewModelScope.launch {
             roomRepository.updateMinus(key, balance.toLong())
         }
     }
 
-    private fun getCurrencyByKey(key: String?): Flow<CurrencyEntity> {
+    private suspend fun getCurrencyByKey(key: String?): CurrencyEntity {
         return roomRepository.getCurrencyByKey(key)
+    }
+
+    private fun insertRate(rateEntity: LatestRateEntity) {
+        viewModelScope.launch {
+            roomRepository.insertRate(rateEntity)
+        }
+    }
+
+    private suspend fun getCurrencyRateByKey(key: String?): LatestRateEntity {
+        return roomRepository.getLatestRateByKey(key)
     }
 
 }

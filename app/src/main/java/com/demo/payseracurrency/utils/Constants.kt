@@ -6,6 +6,9 @@ class Constants {
         const val NUMBER_OF_EXCHANGE = 5
         const val DEFAULT_ACCOUNT = "EUR"
         const val CONVERSION_COUNTER_KEY = "conversionCounterKey"
-        const val NO_OF_CONVERSION_KEY = "numberOfTotalConversion"
+
+        const val DB_NAME = "currency_database"
+        const val DB_TABLE_USER_CURRENCY = "currency_table"
+        const val DB_TABLE_LATEST_RATES = "latest_rates_table"
     }
 }

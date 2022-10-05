@@ -4,10 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.demo.payseracurrency.utils.Constants
 
-@Entity(tableName = Constants.DB_TABLE_USER_CURRENCY)
-data class CurrencyEntity(
+@Entity(tableName = Constants.DB_TABLE_LATEST_RATES)
+data class LatestRateEntity(
     @PrimaryKey
     var currencyName: String,
-    var currencyBalance: Double
+    var conversionRate: Double
 )
 

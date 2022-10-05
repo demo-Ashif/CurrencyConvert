@@ -3,6 +3,7 @@ package com.demo.payseracurrency
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -23,7 +24,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: CurrencyViewModel by viewModels()
     private var currencyAdapter = CurrencyAdapter()
-    var accountList = ArrayList<String>()
+
+    var userFromCurrencyList = ArrayList<String>()
+    var fromCurrencyAdapter: ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,16 +34,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnSubmit.setOnClickListener {
-//            viewModel.startValidationCheck(
-//                binding.spinnerFromCurrency.selectedItem.toString(),
-//                binding.spinnerToCurrency.selectedItem.toString(),
-//                binding.etFromCurrency.text.toString()
-//            )
-            viewModel.convertCurrency(
+            viewModel.startValidationCheck(
                 binding.spinnerFromCurrency.selectedItem.toString(),
                 binding.spinnerToCurrency.selectedItem.toString(),
-                binding.etFromCurrency.text.toString().toDouble()
+                binding.etFromCurrency.text.toString()
             )
+//            viewModel.convertCurrency(
+//                binding.spinnerFromCurrency.selectedItem.toString(),
+//                binding.spinnerToCurrency.selectedItem.toString(),
+//                binding.etFromCurrency.text.toString().toDouble()
+//            )
         }
 
         val rvCurrency = binding.rvCurrency
@@ -55,49 +58,43 @@ class MainActivity : AppCompatActivity() {
         initAllObservers()
 
         viewModel.setInitialCurrency()
+
+        //viewModel.getLatestRates()
     }
 
     private fun initAllObservers() {
         lifecycleScope.launchWhenStarted {
             viewModel.conversionEvent.collect { event ->
                 when (event) {
-                    is CurrencyViewModel.CurrencyConversionEvent.ConversionSuccess -> {
-                        binding.progressBar.isVisible = false
-                        binding.tvConvertedAmountText.setTextColor(Color.GREEN)
-                        binding.tvConvertedAmountText.text =
-                            String.format("%.2f", event.convertResponse.result)
 
-                        viewModel.postConversionCalculation(
-                            event.convertResponse,
-                        )
-                    }
-                    is CurrencyViewModel.CurrencyConversionEvent.PostConversionCalculationDone -> {
-
-                        binding.tvResultText.setTextColor(Color.GREEN)
-                        val resultText =
-                            if (event.commission <= 0) "${event.convertResponse.query.from} ${event.convertResponse.query.amount} = ${event.convertResponse.query.to} ${event.convertResponse.result}"
-                            else "${event.convertResponse.query.from} ${event.convertResponse.query.amount} = ${event.convertResponse.query.to} ${event.convertResponse.result} Commission: ${event.commission}"
-                        binding.tvResultText.text = resultText
-
-//                        showSuccessDialog(
-//                            this@MainActivity,
-//                            """${it.query.amount}${" "}${it.query.from}""",
-//                            """${it.result}${" "}${it.query.to}""",
-//                            String.format("%.2f", viewModel.commision.get())
-//                        )
-
-
-                    }
                     is CurrencyViewModel.CurrencyConversionEvent.ConversionFailure -> {
                         binding.progressBar.isVisible = false
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
                     }
                     is CurrencyViewModel.CurrencyConversionEvent.CheckValidationSuccess -> {
+                        binding.tvResultText.setTextColor(Color.GREEN)
+                        binding.tvResultText.text = "All validation success before converting!"
                         viewModel.convertCurrency(event.from, event.to, event.fromAmount)
                     }
+
                     is CurrencyViewModel.CurrencyConversionEvent.Loading -> {
                         binding.progressBar.isVisible = true
+                    }
+
+                    is CurrencyViewModel.CurrencyConversionEvent.ConversionSuccess -> {
+                        binding.progressBar.isVisible = false
+                        binding.tvConvertedAmountText.setTextColor(Color.GREEN)
+                        binding.tvConvertedAmountText.text = event.successMsg
+
+                        viewModel.roomDbUpdateData(
+                            event.from,
+                            event.fromAmount,
+                            event.to,
+                            event.convertedAmount,
+                            event.commission
+                        )
+
                     }
                     else -> Unit
                 }
@@ -108,11 +105,9 @@ class MainActivity : AppCompatActivity() {
             viewModel.roomEvent.collect { event ->
                 when (event) {
                     is CurrencyViewModel.RoomDataUpdateEvent.InsertNeeded -> {
-//                        Log.d("insert done called", "${event.toString()}")
                         viewModel.getAllCurrencies()
                     }
                     is CurrencyViewModel.RoomDataUpdateEvent.CheckComplete -> {
-//                        Log.d("check complete called", "")
                         viewModel.getAllCurrencies()
                     }
 
@@ -121,46 +116,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.allCurrencies.observe(this) { items ->
-            Log.d("all items", items.toString())
-            currencyAdapter.setCurrencies(items)
-            accountList.clear()
-        }
+        viewModel.allCurrencies.observe(this) { allCurrencies ->
+//            Log.d("all items", allCurrencies.toString())
+            currencyAdapter.setCurrencies(allCurrencies)
 
-        viewModel.convertResponse.observe(this) {
-            lifecycleScope.launch {
-                viewModel.checkAvailableCurrencyByKey(it.query.to).cancellable()
-                    .collect { checkStatus ->
-                        if (checkStatus == 1) {
-                            viewModel.updateMinus(
-                                it.query.from,
-                                it.query.amount.toDouble()
-                            )
-                            viewModel.updateSum(
-                                it.query.to,
-                                it.result
-                            )
-
-                            this.cancel()
-                        } else {
-                            viewModel.updateMinus(
-                                it.query.from,
-                                it.result
-                            )
-                            val currencyEntity =
-                                CurrencyEntity(
-                                    currencyName = it.query.to,
-                                    currencyBalance = it.result
-                                )
-
-                            viewModel.insert(currencyEntity)
-
-                            this.cancel()
-                        }
-                    }
+            userFromCurrencyList.clear()
+            for (item in allCurrencies) {
+                userFromCurrencyList.add(item.currencyName)
             }
+            fromCurrencyAdapter = ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_dropdown_item_1line, userFromCurrencyList
+            )
 
-            viewModel.getAllCurrencies()
+            binding.spinnerFromCurrency.adapter = fromCurrencyAdapter
         }
     }
 

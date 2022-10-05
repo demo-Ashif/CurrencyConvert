@@ -29,7 +29,7 @@ import javax.inject.Singleton
 object AppModule {
 
 //    private const val BASE_URL = "http://demo2427702.mockable.io/"
-    private const val BASE_URL = "https://3878a848-b3dd-458f-922f-7dc3a4070aac.mock.pstmn.io/"
+    private const val BASE_URL = "https://f83408ef-b9ed-416b-abef-ee1340c81499.mock.pstmn.io/"
 
     @Provides
     @Singleton
