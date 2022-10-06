@@ -1,177 +1,269 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".MainActivity">
 
-  <include
-      android:id="@+id/include"
-      layout="@layout/toolbar_main"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
-
-  <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/title_balance"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:layout_marginTop="16dp"
-      android:text="@string/tv_balance"
-      app:layout_constraintStart_toStartOf="@+id/include"
-      app:layout_constraintTop_toBottomOf="@+id/include" />
-
-  <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rv_currency"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      app:layout_constraintBottom_toTopOf="@+id/tvTitle"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      tools:listitem="@layout/item_currencies"
-      app:layout_constraintTop_toBottomOf="@+id/title_balance" />
-
-  <TextView
-      android:id="@+id/tvTitle"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:text="@string/tv_currency_exchange"
-      android:textColor="#2C2C2C"
-      android:textSize="18sp"
-      app:layout_constraintBottom_toTopOf="@+id/guideline"
-      app:layout_constraintStart_toStartOf="parent" />
-
-  <androidx.constraintlayout.widget.Guideline
-      android:id="@+id/guideline"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      app:layout_constraintGuide_percent="0.37" />
-
-  <TextView
-      android:id="@+id/tvSell"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:text="@string/tv_text_sell"
-      app:layout_constraintBottom_toBottomOf="@+id/ivFromCurrency"
-      app:layout_constraintStart_toEndOf="@+id/ivFromCurrency"
-      app:layout_constraintTop_toTopOf="@+id/ivFromCurrency" />
-
-  <TextView
-      android:id="@+id/tvReceive"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:text="@string/tv_text_receive"
-      app:layout_constraintBottom_toBottomOf="@+id/ivToCurrency"
-      app:layout_constraintStart_toEndOf="@+id/ivToCurrency"
-      app:layout_constraintTop_toTopOf="@+id/ivToCurrency" />
-
-  <TextView
-      android:id="@+id/tvConvertedAmountText"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:text=""
-      app:layout_constraintBottom_toBottomOf="@+id/tvReceive"
-      app:layout_constraintEnd_toStartOf="@+id/spinnerToCurrency"
-      app:layout_constraintStart_toStartOf="@+id/tilFromCurrency"
-      app:layout_constraintTop_toTopOf="@+id/tvReceive" />
-
-  <TextView
-      android:id="@+id/tvResultText"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="24dp"
-      android:gravity="center_horizontal"
-      app:layout_constraintBottom_toTopOf="@+id/btnSubmit"
-      app:layout_constraintEnd_toEndOf="@+id/spinnerToCurrency"
-      app:layout_constraintStart_toStartOf="@+id/ivToCurrency" />
-
-  <com.google.android.material.textfield.TextInputLayout
-      android:id="@+id/tilFromCurrency"
-      style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="100dp"
-      android:layout_marginEnd="16dp"
-      android:hint="Amount"
-      app:layout_constraintBottom_toBottomOf="@+id/spinnerFromCurrency"
-      app:layout_constraintEnd_toStartOf="@+id/spinnerFromCurrency"
-      app:layout_constraintStart_toEndOf="@+id/tvSell"
-      app:layout_constraintTop_toTopOf="@+id/spinnerFromCurrency">
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/etFromCurrency"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:inputType="numberDecimal" />
+        android:layout_height="match_parent">
 
-  </com.google.android.material.textfield.TextInputLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000002"
+            android:minHeight="200dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/image"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/icon_dashboard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title_greetings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="Hello, Ashif!"
+                android:textColor="#8a8a8a"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title_my_balance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/tv_balance"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#f5f5f5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_greetings" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_currency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_my_balance" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:minHeight="200dp"
+            android:background="#FFFFFF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/tv_currency_exchange"
+                android:textColor="#2C2C2C"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
 
-  <Spinner
-      android:id="@+id/spinnerFromCurrency"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginEnd="16dp"
-      android:padding="15dp"
-      app:layout_constraintBottom_toBottomOf="@+id/tvSell"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/tvSell" />
+            <TextView
+                android:id="@+id/tvSell"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/tv_text_sell"
+                app:layout_constraintBottom_toBottomOf="@+id/ivFromCurrency"
+                app:layout_constraintStart_toEndOf="@+id/ivFromCurrency"
+                app:layout_constraintTop_toTopOf="@+id/ivFromCurrency" />
 
-  <Spinner
-      android:id="@+id/spinnerToCurrency"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginEnd="16dp"
-      android:entries="@array/currency_code_list"
-      android:padding="15dp"
-      app:layout_constraintBottom_toBottomOf="@+id/tvReceive"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/tvReceive" />
+            <TextView
+                android:id="@+id/tvReceive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/tv_text_receive"
+                app:layout_constraintBottom_toBottomOf="@+id/ivToCurrency"
+                app:layout_constraintStart_toEndOf="@+id/ivToCurrency"
+                app:layout_constraintTop_toTopOf="@+id/ivToCurrency" />
 
-  <Button
-      android:id="@+id/btnSubmit"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="100dp"
-      android:text="@string/btn_text_submit"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/spinnerToCurrency" />
+            <TextView
+                android:id="@+id/tvConvertedAmountText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="#71d209"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/spinnerToCurrency"
+                app:layout_constraintStart_toStartOf="@+id/spinnerToCurrency"
+                app:layout_constraintTop_toBottomOf="@+id/spinnerToCurrency" />
 
-  <ImageView
-      android:id="@+id/ivFromCurrency"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="32dp"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/guideline"
-      app:srcCompat="@drawable/icon_arrow_sell" />
+            <TextView
+                android:id="@+id/tvResultText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center_horizontal"
+                app:layout_constraintBottom_toTopOf="@+id/btnSubmit"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
-  <ImageView
-      android:id="@+id/ivToCurrency"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="32dp"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/ivFromCurrency"
-      app:srcCompat="@drawable/icon_arrow_receive" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilFromCurrency"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Enter Converting Amount"
+                app:layout_constraintEnd_toEndOf="@+id/spinnerToCurrency"
+                app:layout_constraintStart_toStartOf="@+id/ivFromCurrency"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
-  <ProgressBar
-      android:id="@+id/progressBar"
-      style="?android:attr/progressBarStyle"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:visibility="invisible"
-      app:layout_constraintBottom_toTopOf="@+id/btnSubmit"
-      app:layout_constraintEnd_toEndOf="@+id/btnSubmit"
-      app:layout_constraintStart_toStartOf="@+id/btnSubmit" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etFromCurrency"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="numberDecimal" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.skydoves.powerspinner.PowerSpinnerView
+                android:id="@+id/spinnerFromCurrency"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rectangle"
+                android:foreground="?attr/selectableItemBackground"
+                android:padding="10dp"
+                android:textColor="#000002"
+                android:textColorHint="#000002"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivFromCurrency"
+                app:spinner_arrow_drawable="@drawable/icon_down_arrow"
+                app:spinner_arrow_gravity="end"
+                app:spinner_arrow_padding="8dp"
+                app:spinner_divider_show="false"
+                app:spinner_popup_animation="dropdown"
+                app:spinner_popup_background="#FFFFFF"
+                app:spinner_popup_elevation="14dp" />
+
+            <com.skydoves.powerspinner.PowerSpinnerView
+                android:id="@+id/spinnerToCurrency"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/rectangle"
+                android:foreground="?attr/selectableItemBackground"
+                android:padding="10dp"
+                android:textColor="#000002"
+                android:textColorHint="#000002"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivToCurrency"
+                app:spinner_arrow_drawable="@drawable/icon_down_arrow"
+                app:spinner_arrow_gravity="end"
+                app:spinner_arrow_padding="8dp"
+                app:spinner_divider_show="false"
+                app:spinner_item_array="@array/currency_code_list"
+                app:spinner_popup_animation="dropdown"
+                app:spinner_popup_background="#FFFFFF"
+                app:spinner_popup_elevation="14dp" />
+
+
+            <ImageView
+                android:id="@+id/ivFromCurrency"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tilFromCurrency"
+                app:srcCompat="@drawable/icon_arrow_sell" />
+
+            <ImageView
+                android:id="@+id/ivTransfer"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:layout_constraintBottom_toBottomOf="@+id/spinnerFromCurrency"
+                app:layout_constraintEnd_toStartOf="@+id/spinnerToCurrency"
+                app:layout_constraintStart_toEndOf="@+id/spinnerFromCurrency"
+                app:layout_constraintTop_toBottomOf="@+id/tvSell"
+                app:srcCompat="@drawable/icon_transfer" />
+
+            <ImageView
+                android:id="@+id/ivToCurrency"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="@+id/spinnerToCurrency"
+                app:layout_constraintTop_toBottomOf="@+id/tilFromCurrency"
+                app:srcCompat="@drawable/icon_arrow_receive" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@+id/btnSubmit"
+                app:layout_constraintEnd_toEndOf="@+id/btnSubmit"
+                app:layout_constraintStart_toStartOf="@+id/btnSubmit" />
+
+            <Button
+                android:id="@+id/btnSubmit"
+                style="@style/myCustomContainedButton"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="100dp"
+                android:layout_marginEnd="32dp"
+                android:text="@string/btn_text_submit"
+                android:textColor="#000002"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvConvertedAmountText" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

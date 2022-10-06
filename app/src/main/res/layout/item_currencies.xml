@@ -1,26 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="16dp"
-    android:orientation="horizontal">
+    android:layout_width="140dp"
+    android:layout_height="75dp"
+    app:cardBackgroundColor="#eebec1"
+    app:cardCornerRadius="8dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvCurrencyBalance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:textColor="#ffffff"
-        android:text="Account Title"
-        tools:text="1000.0 " />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvCurrencyName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:textColor="#ffffff"
-        tools:text="USD" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvCurrencyBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#292d32"
+            android:textSize="17sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1000.0 " />
 
-</LinearLayout>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvCurrencyName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#292d32"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/tvCurrencyBalance"
+            app:layout_constraintStart_toStartOf="@+id/tvCurrencyBalance"
+            app:layout_constraintTop_toBottomOf="@+id/tvCurrencyBalance"
+            app:textAllCaps="true"
+            tools:text="USD" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

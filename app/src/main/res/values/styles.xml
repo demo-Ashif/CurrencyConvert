@@ -1,0 +1,40 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!--this item is invoked in app theme to override the contained material button-->
+        <item name="materialButtonStyle">@style/myCustomContainedButton</item>
+
+
+    </style>
+    <!--Base application theme ends here-->
+
+    <!--theming of contained button begins here-->
+    <!--parent name is to be give carefully-->
+    <style name="myCustomContainedButton" parent="Widget.MaterialComponents.Button">
+        <!--these all styles are implemented outside, because to get all the overridden attributes easily-->
+        <item name="shapeAppearance">@style/customContainedButtonTheme</item>
+        <item name="android:textAppearance">@style/myCustomTextForMaterialButtons</item>
+    </style>
+    <!--overriding cornerSize and cornerFamily of the contained button-->
+    <style name="customContainedButtonTheme">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+        <item name="contentPadding">24dp</item>
+    </style>
+    <!--theming of contained button ends here-->
+
+    <!--Font family and size of all the buttons in the entire application should be same-->
+    <!--so this child is common for all the material buttons in entire application-->
+    <style name="myCustomTextForMaterialButtons">
+
+        <item name="android:textSize">18sp</item>
+
+    </style>
+
+</resources>

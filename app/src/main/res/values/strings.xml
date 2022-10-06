@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Currency Convert</string>
     <string name="tv_balance">My Balances</string>
-    <string name="tv_currency_exchange">CURRENCY EXCHANGE</string>
+    <string name="tv_currency_exchange">Currency Exchange</string>
     <string name="btn_text_submit">Submit</string>
     <string name="tv_dialog_message">You have converted %1$s to %2$s  \n Commission fee %3$s.</string>
     <string name="tv_text_sell">Sell</string>

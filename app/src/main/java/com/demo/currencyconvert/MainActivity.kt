@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.currencyconvert.databinding.ActivityMainBinding
 import com.demo.currencyconvert.ui.adapter.CurrencyAdapter
 import com.demo.currencyconvert.ui.views.CustomDialog.Companion.showSuccessDialog
+import com.demo.currencyconvert.utils.Helper
 import com.demo.currencyconvert.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -26,17 +27,32 @@ class MainActivity : AppCompatActivity() {
     private var currencyAdapter = CurrencyAdapter()
 
     var userFromCurrencyList = ArrayList<String>()
-    var fromCurrencyAdapter: ArrayAdapter<String>? = null
+
+    // spinner values
+    lateinit var  fromSpinnerCurrency:String
+    lateinit var  toSpinnerCurrency:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.spinnerFromCurrency.setOnSpinnerItemSelectedListener<String> { _, _, _, text ->
+            fromSpinnerCurrency=text
+        }
+
+
+        binding.spinnerToCurrency.setOnSpinnerItemSelectedListener<String> { _, _, _, text ->
+            toSpinnerCurrency=text
+        }
+        binding.spinnerToCurrency.selectItemByIndex(0)
+
         binding.btnSubmit.setOnClickListener {
+            Helper.hideKeyboard(this)
+            binding.tvConvertedAmountText.text = ""
             viewModel.startValidationCheck(
-                binding.spinnerFromCurrency.selectedItem.toString(),
-                binding.spinnerToCurrency.selectedItem.toString(),
+                fromSpinnerCurrency,
+                toSpinnerCurrency,
                 binding.etFromCurrency.text.toString()
             )
         }
@@ -65,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     viewModel.getLatestRates()
-                    delay(5000)
+                    delay(30000)
                 }
             }
         }
@@ -95,7 +111,6 @@ class MainActivity : AppCompatActivity() {
 
                     is CurrencyViewModel.CurrencyConversionEvent.ConversionSuccess -> {
                         binding.progressBar.isVisible = false
-                        binding.tvConvertedAmountText.setTextColor(Color.GREEN)
                         binding.tvConvertedAmountText.text = event.successMsg
 
                         binding.tvResultText.setTextColor(Color.TRANSPARENT)
@@ -148,12 +163,14 @@ class MainActivity : AppCompatActivity() {
             for (item in allCurrencies) {
                 userFromCurrencyList.add(item.currencyName)
             }
-            fromCurrencyAdapter = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_dropdown_item_1line, userFromCurrencyList
-            )
+//            fromCurrencyAdapter = ArrayAdapter<String>(
+//                this,
+//                android.R.layout.simple_dropdown_item_1line, userFromCurrencyList
+//            )
 
-            binding.spinnerFromCurrency.adapter = fromCurrencyAdapter
+            binding.spinnerFromCurrency.setItems(userFromCurrencyList)
+            binding.spinnerFromCurrency.selectItemByIndex(0)
+
         }
     }
 
