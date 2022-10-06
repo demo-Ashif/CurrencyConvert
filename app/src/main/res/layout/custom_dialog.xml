@@ -1,74 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    tools:ignore="MissingDefaultResource">
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/space_xxlarge"
+    android:layout_marginRight="@dimen/space_xxlarge"
+    app:cardCornerRadius="8dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="300dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/space_xxlarge"
-        android:layout_marginRight="@dimen/space_xxlarge"
-        app:cardCornerRadius="14dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="@android:color/transparent"
+        tools:ignore="MissingDefaultResource">
 
-        <LinearLayout
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            android:text="@string/tv_dialog_title"
+            android:textColor="#eebec1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
+
+        <TextView
+            android:id="@+id/tvDialogTransferred"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            android:text="Transferred"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/tvTransferredAmount"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
+
+        <TextView
+            android:id="@+id/tvTransferredAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:text="@string/tv_dialog_transfer_message"
+            android:textColor="#000002"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/circle_1"
+            app:layout_constraintTop_toBottomOf="@+id/tvDialogTransferred"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
+
+        <TextView
+            android:id="@+id/tvDialogReceived"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            android:text="Received"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/tvReceivedAmount"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
+
+        <TextView
+            android:id="@+id/tvReceivedAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            android:text="@string/tv_dialog_receive_message"
+            android:textColor="#000002"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDialogReceived"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
+
+        <ImageView
+            android:id="@+id/circle_1"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/circle_shape_1"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTransferredAmount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvDialogTransferred" />
+
+        <ImageView
+            android:id="@+id/circle_2"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/circle_shape_2"
+            app:layout_constraintBottom_toBottomOf="@+id/tvReceivedAmount"
+            app:layout_constraintEnd_toStartOf="@+id/tvReceivedAmount"
+            app:layout_constraintTop_toTopOf="@+id/tvDialogReceived" />
+
+        <TextView
+            android:id="@+id/tvDialogCommission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:text=""
+            android:textColor="#6994ff"
+            android:textStyle="bold|italic"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/tvTransferredAmount"
+            app:layout_constraintTop_toBottomOf="@+id/tvTransferredAmount"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
+
+        <View
+            android:id="@+id/view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="@dimen/space_large"
-            android:paddingBottom="@dimen/space_large"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/space_medium"
-                android:layout_marginRight="@dimen/space_medium"
-                android:layout_marginTop="@dimen/space_xlarge"
-                android:text="@string/tv_dialog_title"
-                android:layout_gravity="center"
-                android:textSize="15dp"
-                tools:ignore="HardcodedText,RtlHardcoded,SpUsage"/>
-
-            <TextView
-                android:id="@+id/tv_dialog_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/space_medium"
-                android:layout_marginRight="@dimen/space_medium"
-                android:text="This sis subm heading "
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/space_medium"
-                tools:ignore="HardcodedText,RtlHardcoded,SpUsage"/>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_marginTop="@dimen/space_large"
-                android:background="@color/black"
-                android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="32dp"
+            android:background="#E6E6E6"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDialogCommission" />
 
 
-            <TextView
-                android:id="@+id/txt_done"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp"
-                android:padding="@dimen/space_medium"
-                android:gravity="center"
-                android:text="Done"
-                android:textColor="#4D7CF4"
-                android:textSize="16dp"
-                tools:ignore="HardcodedText,RtlHardcoded,SpUsage"/>
+        <TextView
+            android:id="@+id/txt_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:padding="@dimen/space_medium"
+            android:text="Done"
+            android:textStyle="bold"
+            android:textColor="#6994ff"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />
 
-        </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

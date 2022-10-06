@@ -121,9 +121,11 @@ class MainActivity : AppCompatActivity() {
                         //show Dialog for conversion success message with commission
                         showSuccessDialog(
                             this@MainActivity,
-                            """${event.fromAmount}${" "}${event.from}""",
-                            """${event.convertedAmount}${" "}${event.to}""",
-                            String.format("%.2f", event.commission)
+                            event.from,
+                            String.format("%.2f",event.fromAmount),
+                            event.to,
+                            String.format("%.2f",event.convertedAmount),
+                            event.commission
                         )
 
                         viewModel.roomDbUpdateData(
@@ -163,10 +165,6 @@ class MainActivity : AppCompatActivity() {
             for (item in allCurrencies) {
                 userFromCurrencyList.add(item.currencyName)
             }
-//            fromCurrencyAdapter = ArrayAdapter<String>(
-//                this,
-//                android.R.layout.simple_dropdown_item_1line, userFromCurrencyList
-//            )
 
             binding.spinnerFromCurrency.setItems(userFromCurrencyList)
             binding.spinnerFromCurrency.selectItemByIndex(0)

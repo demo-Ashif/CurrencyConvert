@@ -5,11 +5,13 @@
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1095" />
         <entry key="app/src/main/res/drawable-v24/rectangle.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/circle_shape.xml" value="0.1755" />
+        <entry key="app/src/main/res/drawable/circle_shape_2.xml" value="0.1755" />
         <entry key="app/src/main/res/drawable/circular.xml" value="0.165" />
         <entry key="app/src/main/res/drawable/image.xml" value="0.2175" />
         <entry key="app/src/main/res/drawable/rectangle.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/custom_dialog.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/custom_dialog.xml" value="0.335" />
         <entry key="app/src/main/res/layout/item_accounts.xml" value="0.19610507246376813" />
         <entry key="app/src/main/res/layout/item_currencies.xml" value="0.1" />
         <entry key="app/src/main/res/layout/toolbar_main.xml" value="0.1" />
