@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.setInitialCurrency()
 
-        //getLatestRateRepeatMethod()
+        getLatestRateRepeatMethod()
 
 
     }
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     viewModel.getLatestRates()
-                    delay(30000)
+                    delay(60000)
                 }
             }
         }
