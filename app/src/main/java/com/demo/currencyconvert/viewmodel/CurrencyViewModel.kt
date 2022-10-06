@@ -89,6 +89,10 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
+    fun testUpdate(){
+        Log.d(TAG, "Printing Log ... ...")
+    }
+
 
     fun setInitialCurrency() {
         viewModelScope.launch(dispatcher.io) {

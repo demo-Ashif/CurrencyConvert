@@ -6,13 +6,17 @@ import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.currencyconvert.databinding.ActivityMainBinding
 import com.demo.currencyconvert.ui.adapter.CurrencyAdapter
 import com.demo.currencyconvert.ui.views.CustomDialog.Companion.showSuccessDialog
 import com.demo.currencyconvert.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -50,7 +54,21 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.setInitialCurrency()
 
-        viewModel.getLatestRates()
+        getLatestRateRepeatMethod()
+
+
+    }
+
+    private fun getLatestRateRepeatMethod() {
+        val lifecycle = this
+        lifecycle.lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                while (true) {
+                    viewModel.getLatestRates()
+                    delay(5000)
+                }
+            }
+        }
     }
 
     private fun initAllObservers() {
