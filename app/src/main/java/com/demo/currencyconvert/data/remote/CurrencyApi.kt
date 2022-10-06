@@ -8,12 +8,12 @@ import retrofit2.http.Query
 
 interface CurrencyApi {
 
-    @GET("/latest")
+    @GET("latest")
     suspend fun getRates(
         @Query("base") base: String
     ): Response<LatestCurrencyResponse>
 
-    @GET("/convert")
+    @GET("convert")
     suspend fun getConverted(
         @Query("from") from: String,
         @Query("to") to: String,

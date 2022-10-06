@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.setInitialCurrency()
 
-        getLatestRateRepeatMethod()
+        //getLatestRateRepeatMethod()
 
 
     }
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
     private fun getLatestRateRepeatMethod() {
         val lifecycle = this
         lifecycle.lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     viewModel.getLatestRates()
                     delay(5000)

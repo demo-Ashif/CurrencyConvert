@@ -30,7 +30,7 @@ import javax.inject.Singleton
 object AppModule {
 
     //private const val BASE_URL = "https://f83408ef-b9ed-416b-abef-ee1340c81499.mock.pstmn.io/"
-    private const val BASE_URL = "https://api.apilayer.com/exchangerates_data"
+    private const val BASE_URL = "https://api.apilayer.com/exchangerates_data/"
     private const val API_KEY = "h45AvFWdBdixiMYYlP240HbENoDeMaAZ"
 
     @Provides
