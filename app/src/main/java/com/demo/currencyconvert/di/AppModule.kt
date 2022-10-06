@@ -17,6 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -28,8 +29,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-//    private const val BASE_URL = "http://demo2427702.mockable.io/"
-    private const val BASE_URL = "https://f83408ef-b9ed-416b-abef-ee1340c81499.mock.pstmn.io/"
+    //private const val BASE_URL = "https://f83408ef-b9ed-416b-abef-ee1340c81499.mock.pstmn.io/"
+    private const val BASE_URL = "https://api.apilayer.com/exchangerates_data"
+    private const val API_KEY = "h45AvFWdBdixiMYYlP240HbENoDeMaAZ"
 
     @Provides
     @Singleton
@@ -38,12 +40,27 @@ object AppModule {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+    @Provides
+    @Singleton
+    fun providesInterceptor() = Interceptor { chain ->
+        val request = chain.request()
+            .newBuilder()
+            .addHeader("apikey", API_KEY)
+            .build()
+
+        return@Interceptor chain.proceed(request)
+    }
+
     @Singleton
     @Provides
-    fun providesOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+    fun providesOkHttpClient(
+        httpLoggingInterceptor: HttpLoggingInterceptor,
+        interceptor: Interceptor
+    ): OkHttpClient =
         OkHttpClient
             .Builder()
-            .addInterceptor(httpLoggingInterceptor)
+            .addNetworkInterceptor(httpLoggingInterceptor)
+            .addInterceptor(interceptor)
             .build()
 
     @Provides
@@ -59,7 +76,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCurrencyRepository(api: CurrencyApi): CurrencyRepository = CurrencyRepositoryImpl(api)
+    fun provideCurrencyRepository(api: CurrencyApi): CurrencyRepository =
+        CurrencyRepositoryImpl(api)
 
     @Provides
     @Singleton
@@ -73,7 +91,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRoomRepository(currencyDAO: CurrencyDAO): RoomRepository = RoomRepositoryImpl(currencyDAO)
+    fun provideRoomRepository(currencyDAO: CurrencyDAO): RoomRepository =
+        RoomRepositoryImpl(currencyDAO)
 
     @Singleton
     @Provides
