@@ -2,6 +2,7 @@ package com.demo.currencyconvert.viewmodel
 
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.databinding.ObservableDouble
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -47,15 +48,13 @@ class CurrencyViewModel @Inject constructor(
             val fromAmount: Double,
             val to: String,
             val convertedAmount: Double,
-            val commission: Double
+            val commissionMsg: String
         ) : CurrencyConversionEvent()
 
     }
 
     sealed class RoomDataUpdateEvent {
         object InsertNeeded : RoomDataUpdateEvent()
-
-        //object RoomDbUpdateDone : RoomDataUpdateEvent()
         object CheckComplete : RoomDataUpdateEvent()
         object Empty : RoomDataUpdateEvent()
     }
@@ -89,10 +88,6 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
-    fun testUpdate(){
-        Log.d(TAG, "Printing Log ... ...")
-    }
-
 
     fun setInitialCurrency() {
         viewModelScope.launch(dispatcher.io) {
@@ -110,8 +105,6 @@ class CurrencyViewModel @Inject constructor(
             }
         }
     }
-
-    //val commission = ObservableDouble(0.0)
 
 
     fun startValidationCheck(from: String, to: String, amount: String) {
@@ -175,26 +168,77 @@ class CurrencyViewModel @Inject constructor(
                     toLatestRate.conversionRate,
                     fromAmount
                 )
+                val conversionMsg = "+$convertedAmount"
 
-
+                // saving number of total exchange occurred by user
                 saveExchangeCount()
 
                 val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
 
-                val commission =
-                    if (totalNumber <= Constants.NUMBER_OF_EXCHANGE) 0.0 else fromAmount * (0.7 / 100.0)
+                if (totalNumber <= Constants.NUMBER_OF_FREE_EXCHANGE) {
 
-                val conversionMsg = "+$convertedAmount"
+                    _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
+                        conversionMsg, from, fromAmount, to, convertedAmount, ""
+                    )
+                } else {
+                    val commissionMsg = applyCommissionRules(
+                        totalNumber,
+                        from,
+                        fromAmount,
+                        toLatestRate.conversionRate,
+                        convertedAmount
+                    )
 
-                _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
-                    conversionMsg, from, fromAmount, to, convertedAmount, commission
-                )
+                    _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
+                        conversionMsg, from, fromAmount, to, convertedAmount, commissionMsg
+                    )
+                }
 
             } catch (e: Exception) {
                 _conversionEvent.value =
                     CurrencyConversionEvent.ConversionFailure("Something went wrong. Conversion failed!")
             }
         }
+
+    }
+
+    val currentCommission = ObservableDouble(0.0)
+
+    private fun applyCommissionRules(
+        totalConversionNumber: Int,
+        from: String,
+        fromAmount: Double,
+        toLatestConversionRate: Double,
+        convertedAmount: Double
+    ): String {
+
+        Log.d(TAG, "Total no of conversion: $totalConversionNumber")
+
+        currentCommission.set(0.0)
+
+        // checking the amount is under 200 euro
+        val amountInEuro = (convertedAmount / toLatestConversionRate)
+        Log.d(TAG, "amount in euro: $amountInEuro")
+
+        if (amountInEuro < 200) {
+            return "No commission up to 200 EUR!" // no commission on every 10th exchange
+        }
+
+        if (totalConversionNumber % Constants.FREE_EXCHANGE_DIVIDER == 0) {
+            return "No commission on your every 10th exchange!" // no commission on every 10th exchange
+        }
+
+        val commissionAmount = fromAmount * (0.7 / 100.0)
+
+        currentCommission.set(commissionAmount)
+
+        return "Commission: $from ${
+            String.format(
+                "%.2f",
+                commissionAmount
+            )
+        }"
+
 
     }
 

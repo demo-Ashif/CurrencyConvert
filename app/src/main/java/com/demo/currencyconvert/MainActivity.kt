@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.setInitialCurrency()
 
-        getLatestRateRepeatMethod()
+        //getLatestRateRepeatMethod()
 
 
     }
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                             String.format("%.2f",event.fromAmount),
                             event.to,
                             String.format("%.2f",event.convertedAmount),
-                            event.commission
+                            event.commissionMsg
                         )
 
                         viewModel.roomDbUpdateData(
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                             event.fromAmount,
                             event.to,
                             event.convertedAmount,
-                            event.commission
+                            viewModel.currentCommission.get()
                         )
 
                     }
