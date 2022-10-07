@@ -39,12 +39,6 @@ class CurrencyViewModel @Inject constructor(
         class AddNewCurrencyFailure(val errorText: String) : CurrencyConversionEvent()
         class AddNewCurrencySuccess(val successMsg: String) : CurrencyConversionEvent()
 
-        class CheckValidationSuccess(
-            val from: String,
-            val to: String,
-            val fromAmount: Double
-        ) : CurrencyConversionEvent()
-
         class ConversionSuccess(
             val successMsg: String,
             val from: String,
@@ -132,71 +126,59 @@ class CurrencyViewModel @Inject constructor(
         }
 
         //check user has the available balance in from currency
-        viewModelScope.launch(dispatcher.io) {
-            val currencyEntity = getCurrencyByKey(from)
-            checkAvailableBalanceToSell(currencyEntity, from, to, fromAmount)
-        }
+        checkAvailableBalanceAndCommissionAndConvert(from, fromAmount, to)
     }
 
-    private fun checkAvailableBalanceToSell(
-        currencyEntity: CurrencyEntity,
+    private fun checkAvailableBalanceAndCommissionAndConvert(
         from: String,
-        to: String,
-        fromAmount: Double
+        fromAmount: Double,
+        to: String
     ) {
-
-        if (currencyEntity.currencyBalance < fromAmount) {
-            _conversionEvent.value =
-                CurrencyConversionEvent.ConversionFailure("Insufficient balance!")
-            return
-        } else {
-            _conversionEvent.value =
-                CurrencyConversionEvent.CheckValidationSuccess(from, to, fromAmount)
-            return
-        }
-
-    }
-
-    fun convertCurrency(from: String, to: String, fromAmount: Double) {
 
         _conversionEvent.value = CurrencyConversionEvent.Loading
 
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher.io) {
+
+            //check there is available fromCurrency amount including probable commission
             try {
+                val currencyEntity = getCurrencyByKey(from)
                 val fromLatestRate = getCurrencyRateByKey(from)
                 val toLatestRate = getCurrencyRateByKey(to)
 
-                val convertedAmount = getTwoDecimalConvertedAmount(
+                val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
+
+                val probableConvertedAmount = getTwoDecimalConvertedAmount(
                     fromLatestRate.conversionRate,
                     toLatestRate.conversionRate,
                     fromAmount
                 )
-                val conversionMsg = "+$convertedAmount"
 
-                // saving number of total exchange occurred by user
-                saveExchangeCount()
+                val commissionMsg = applyCommissionRules(
+                    totalNumber, from, fromAmount, toLatestRate.conversionRate,
+                    probableConvertedAmount
+                )
 
-                val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
+                val conversionMsg = "+$probableConvertedAmount"
 
-                if (totalNumber <= Constants.NUMBER_OF_FREE_EXCHANGE) {
+                if (currencyEntity.currencyBalance < (fromAmount + currentCommission.get())) {
+                    Log.d(TAG, "currencyBalance: ${currencyEntity.currencyBalance} - fromAmount: $fromAmount commission: ${currentCommission.get()}")
+                    _conversionEvent.value =
+                        CurrencyConversionEvent.ConversionFailure("Insufficient balance (incl. commission)!")
 
-                    _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
-                        conversionMsg, from, fromAmount, to, convertedAmount, ""
-                    )
                 } else {
-                    val commissionMsg = applyCommissionRules(
-                        totalNumber,
-                        from,
-                        fromAmount,
-                        toLatestRate.conversionRate,
-                        convertedAmount
-                    )
+                    // saving number of total exchange occurred by user
+                    saveExchangeCount()
 
-                    _conversionEvent.value = CurrencyConversionEvent.ConversionSuccess(
-                        conversionMsg, from, fromAmount, to, convertedAmount, commissionMsg
-                    )
+                    _conversionEvent.value =
+                        CurrencyConversionEvent.ConversionSuccess(
+                            conversionMsg,
+                            from,
+                            fromAmount,
+                            to,
+                            probableConvertedAmount,
+                            commissionMsg
+                        )
                 }
-
             } catch (e: Exception) {
                 _conversionEvent.value =
                     CurrencyConversionEvent.ConversionFailure("Something went wrong. Conversion failed!")
@@ -207,6 +189,7 @@ class CurrencyViewModel @Inject constructor(
 
     val currentCommission = ObservableDouble(0.0)
 
+
     private fun applyCommissionRules(
         totalConversionNumber: Int,
         from: String,
@@ -215,13 +198,18 @@ class CurrencyViewModel @Inject constructor(
         convertedAmount: Double
     ): String {
 
-        Log.d(TAG, "Total no of conversion: $totalConversionNumber")
+        //Log.d(TAG, "Total no of conversion: $totalConversionNumber")
 
         currentCommission.set(0.0)
 
+        if (totalConversionNumber <= Constants.NUMBER_OF_FREE_EXCHANGE) {
+            return ""
+        }
+
         // checking the amount is under 200 euro
         val amountInEuro = (convertedAmount / toLatestConversionRate)
-        Log.d(TAG, "amount in euro: $amountInEuro")
+
+        Log.d(TAG, "Amount in euro: $amountInEuro")
 
         if (amountInEuro < 200) {
             return "No commission up to 200 EUR!" // no commission on every 10th exchange

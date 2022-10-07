@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
 
     var userFromCurrencyList = ArrayList<String>()
 
-    // spinner values
     lateinit var fromSpinnerCurrency: String
     lateinit var toSpinnerCurrency: String
 
@@ -91,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     viewModel.getLatestRates()
-                    delay(60000)
+                    delay(30000)
                 }
             }
         }
@@ -108,12 +107,12 @@ class MainActivity : AppCompatActivity() {
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
                     }
-                    is CurrencyViewModel.CurrencyConversionEvent.CheckValidationSuccess -> {
-                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
-                        binding.tvResultText.text = ""
-                        //binding.tvResultText.text = "All validation success before converting!"
-                        viewModel.convertCurrency(event.from, event.to, event.fromAmount)
-                    }
+//                    is CurrencyViewModel.CurrencyConversionEvent.CheckValidationSuccess -> {
+//                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
+//                        binding.tvResultText.text = ""
+//                        //binding.tvResultText.text = "All validation success before converting!"
+//                        viewModel.convertCurrency(event.from, event.to, event.fromAmount)
+//                    }
 
                     is CurrencyViewModel.CurrencyConversionEvent.Loading -> {
                         binding.progressBar.isVisible = true
@@ -147,10 +146,14 @@ class MainActivity : AppCompatActivity() {
                         )
 
                     }
-                    is CurrencyViewModel.CurrencyConversionEvent.AddNewCurrencySuccess ->{
+                    is CurrencyViewModel.CurrencyConversionEvent.AddNewCurrencySuccess -> {
+                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
+                        binding.tvResultText.text = ""
                         showSnackBar(binding.root, event.successMsg)
                     }
-                    is CurrencyViewModel.CurrencyConversionEvent.AddNewCurrencyFailure ->{
+                    is CurrencyViewModel.CurrencyConversionEvent.AddNewCurrencyFailure -> {
+                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
+                        binding.tvResultText.text = ""
                         showSnackBar(binding.root, event.errorText)
                     }
                     else -> Unit
@@ -174,7 +177,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.allCurrencies.observe(this) { allCurrencies ->
-//            Log.d("all items", allCurrencies.toString())
             currencyAdapter.setCurrencies(allCurrencies)
 
             userFromCurrencyList.clear()
@@ -224,7 +226,6 @@ class MainActivity : AppCompatActivity() {
                 dismiss()
             }
             show()
-//        }
         }
 
     }
