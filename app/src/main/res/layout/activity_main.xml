@@ -211,8 +211,8 @@
 
             <ImageView
                 android:id="@+id/ivFromCurrency"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="24dp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -231,8 +231,8 @@
 
             <ImageView
                 android:id="@+id/ivToCurrency"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_marginTop="24dp"
                 app:layout_constraintStart_toStartOf="@+id/spinnerToCurrency"
                 app:layout_constraintTop_toBottomOf="@+id/tilFromCurrency"
@@ -261,6 +261,21 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvConvertedAmountText" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnFabAddNewCurrency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_margin="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/ic_add_account"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnSubmit" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

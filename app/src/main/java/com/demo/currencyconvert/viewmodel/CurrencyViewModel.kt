@@ -36,6 +36,9 @@ class CurrencyViewModel @Inject constructor(
         object Empty : CurrencyConversionEvent()
         class ConversionFailure(val errorText: String) : CurrencyConversionEvent()
 
+        class AddNewCurrencyFailure(val errorText: String) : CurrencyConversionEvent()
+        class AddNewCurrencySuccess(val successMsg: String) : CurrencyConversionEvent()
+
         class CheckValidationSuccess(
             val from: String,
             val to: String,
@@ -262,9 +265,6 @@ class CurrencyViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkAvailableCurrencyByKey(key: String): Int {
-        return roomRepository.checkCurrencyByKey(key)
-    }
 
     fun getAllCurrencies() {
         viewModelScope.launch(dispatcher.io) {
@@ -310,6 +310,43 @@ class CurrencyViewModel @Inject constructor(
 
     }
 
+    //adding new currency
+
+    fun addNewCurrency(currencyName: String, currencyAmountStr: String) {
+        val currencyAmount = currencyAmountStr.toDoubleOrNull()
+
+        if (currencyAmount == null) {
+            _conversionEvent.value =
+                CurrencyConversionEvent.AddNewCurrencyFailure("Please give valid amount!")
+            return
+        }
+
+        viewModelScope.launch(dispatcher.io) {
+            try {
+                val checkStatus = checkAvailableCurrencyByKey(currencyName)
+                if (checkStatus != 1) {
+                    insert(
+                        CurrencyEntity(
+                            currencyName,
+                            currencyAmount
+                        )
+                    )
+                } else {
+                    updateSum(currencyName, currencyAmount)
+                }
+
+                getAllCurrencies()
+
+                _conversionEvent.value =
+                    CurrencyConversionEvent.AddNewCurrencySuccess("New $currencyName currency added!")
+
+            } catch (e: Exception) {
+                _conversionEvent.value =
+                    CurrencyConversionEvent.AddNewCurrencyFailure("Add new currency failed!")
+            }
+        }
+    }
+
     private suspend fun insert(currencyEntity: CurrencyEntity) {
         roomRepository.insert(currencyEntity)
     }
@@ -319,13 +356,15 @@ class CurrencyViewModel @Inject constructor(
     }
 
     private suspend fun updateMinus(key: String, balance: Double) {
-//        Log.d(TAG, "fromAmountWithCommission: $balance")
-//        Log.d(TAG, "fromAmountWithCommission toLong: ${balance.toLong()}")
         roomRepository.updateMinus(key, balance)
     }
 
     private suspend fun getCurrencyByKey(key: String?): CurrencyEntity {
         return roomRepository.getCurrencyByKey(key)
+    }
+
+    private suspend fun checkAvailableCurrencyByKey(key: String): Int {
+        return roomRepository.checkCurrencyByKey(key)
     }
 
     private fun insertRate(rateEntity: LatestRateEntity) {
