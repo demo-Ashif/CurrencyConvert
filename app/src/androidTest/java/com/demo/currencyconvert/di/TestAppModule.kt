@@ -1,4 +1,4 @@
-package com.demo.currencyconvert
+package com.demo.currencyconvert.di
 
 import android.content.Context
 import androidx.room.Room
@@ -15,7 +15,7 @@ import javax.inject.Named
 object TestAppModule {
 
     @Provides
-    @Named("test_db")
+    @Named("test_currency_db")
     fun provideInMemoryDb(@ApplicationContext context: Context) =
         Room.inMemoryDatabaseBuilder(
             context, CurrencyDatabase::class.java)

@@ -1,4 +1,4 @@
-package com.demo.currencyconvert
+package com.demo.currencyconvert.data.room
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.filters.SmallTest
@@ -28,7 +28,7 @@ class CurrencyDaoTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Inject
-    @Named("test_db")
+    @Named("test_currency_db")
     lateinit var currencyDatabase: CurrencyDatabase
     private lateinit var currencyDao: CurrencyDAO
 

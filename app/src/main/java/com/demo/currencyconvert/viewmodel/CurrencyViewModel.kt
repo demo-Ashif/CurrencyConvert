@@ -24,10 +24,11 @@ import kotlin.math.round
 @HiltViewModel
 class CurrencyViewModel @Inject constructor(
     private val repository: CurrencyRepository,
-    private val roomRepository: RoomRepository,
-    private val dispatcher: DispatcherProvider,
-    private val sharedPref: SharedPreferences
+    private val roomRepository: RoomRepository
 ) : ViewModel() {
+
+    @Inject lateinit var sharedPref: SharedPreferences
+    @Inject lateinit var dispatcher: DispatcherProvider
 
     private val TAG = CurrencyViewModel::class.simpleName
 
@@ -146,6 +147,7 @@ class CurrencyViewModel @Inject constructor(
                 val toLatestRate = getCurrencyRateByKey(to)
 
                 val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
+                Log.d(TAG,"total conversion number: $totalNumber")
 
                 val probableConvertedAmount = getTwoDecimalConvertedAmount(
                     fromLatestRate.conversionRate,
