@@ -147,7 +147,6 @@ class CurrencyViewModel @Inject constructor(
                 val toLatestRate = getCurrencyRateByKey(to)
 
                 val totalNumber = sharedPref.getInt(Constants.CONVERSION_COUNTER_KEY, 0)
-                Log.d(TAG,"total conversion number: $totalNumber")
 
                 val probableConvertedAmount = getTwoDecimalConvertedAmount(
                     fromLatestRate.conversionRate,
@@ -163,8 +162,7 @@ class CurrencyViewModel @Inject constructor(
                 val conversionMsg = "+$probableConvertedAmount"
 
                 if (currencyEntity.currencyBalance < (fromAmount + currentCommission.get())) {
-                    Log.d(TAG, "currencyBalance: ${currencyEntity.currencyBalance} - fromAmount: $fromAmount commission: ${currentCommission.get()}")
-                    _conversionEvent.value =
+                   _conversionEvent.value =
                         CurrencyConversionEvent.ConversionFailure("Insufficient balance (incl. commission)!")
 
                 } else {

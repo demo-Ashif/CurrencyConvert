@@ -46,7 +46,7 @@ class CurrencyDaoTest {
     @Test
     fun insertUser() = runBlocking {
         val currency = CurrencyEntity(
-            currencyName = "Euro",
+            currencyName = "EUR",
             currencyBalance = 1000.00
         )
         currencyDao.insert(currency)

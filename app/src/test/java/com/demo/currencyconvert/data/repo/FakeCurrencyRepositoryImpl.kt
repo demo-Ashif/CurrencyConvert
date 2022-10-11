@@ -2,13 +2,9 @@ package com.demo.currencyconvert.data.repo
 
 import com.demo.currencyconvert.data.models.ConvertResponse
 import com.demo.currencyconvert.data.models.LatestCurrencyResponse
-import com.demo.currencyconvert.data.remote.CurrencyApi
 import com.demo.currencyconvert.utils.Resource
-import javax.inject.Inject
 
-class MockCurrencyRepositoryImpl @Inject constructor(
-    private val api: CurrencyApi
-) : CurrencyRepository {
+class FakeCurrencyRepositoryImpl () : CurrencyRepository {
 
     private var shouldReturnNetworkError = false
 
@@ -38,18 +34,8 @@ class MockCurrencyRepositoryImpl @Inject constructor(
         to: String,
         amount: Double
     ): Resource<ConvertResponse> {
-
-        return try {
-            val response = api.getConverted(from, to, amount)
-            val result = response.body()
-            if (response.isSuccessful && result != null) {
-                Resource.Success(result)
-            } else {
-                Resource.Error(response.message())
-            }
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Something went wrong!")
-        }
+        TODO("No need to implement")
     }
+
 
 }
