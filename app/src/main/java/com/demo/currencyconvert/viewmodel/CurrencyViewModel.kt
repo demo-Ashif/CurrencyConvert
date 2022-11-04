@@ -65,7 +65,7 @@ class CurrencyViewModel @Inject constructor(
     val roomEvent: StateFlow<RoomDataUpdateEvent> = _roomEvent
 
     private val _allCurrencies = MutableLiveData<List<CurrencyEntity>>()
-    val allCurrencies: LiveData<List<CurrencyEntity>> = _allCurrencies//
+    val allCurrencies: LiveData<List<CurrencyEntity>> = _allCurrencies
 
     fun getLatestRates() {
         viewModelScope.launch(dispatcher.io) {
