@@ -2,10 +2,10 @@ package com.demo.currencyconvert.data.room
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.filters.SmallTest
-import com.demo.currencyconvert.data.room.CurrencyDAO
-import com.demo.currencyconvert.data.room.CurrencyDatabase
-import com.demo.currencyconvert.data.room.CurrencyEntity
-import com.demo.currencyconvert.data.room.LatestRateEntity
+import com.demo.currencyconvert.feature_currency_convert.data.local.CurrencyDAO
+import com.demo.currencyconvert.feature_currency_convert.data.local.CurrencyDatabase
+import com.demo.currencyconvert.feature_currency_convert.data.local.entity.CurrencyEntity
+import com.demo.currencyconvert.feature_currency_convert.data.local.entity.LatestRateEntity
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

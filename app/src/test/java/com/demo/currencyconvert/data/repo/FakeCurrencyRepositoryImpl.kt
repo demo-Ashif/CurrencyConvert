@@ -1,8 +1,9 @@
 package com.demo.currencyconvert.data.repo
 
-import com.demo.currencyconvert.data.models.ConvertResponse
-import com.demo.currencyconvert.data.models.LatestCurrencyResponse
-import com.demo.currencyconvert.utils.Resource
+import com.demo.currencyconvert.feature_currency_convert.data.models.ConvertResponse
+import com.demo.currencyconvert.feature_currency_convert.data.remote.dto.LatestCurrencyDto
+import com.demo.currencyconvert.feature_currency_convert.domain.repository.CurrencyRepository
+import com.demo.currencyconvert.core.utils.Resource
 
 class FakeCurrencyRepositoryImpl () : CurrencyRepository {
 
@@ -12,9 +13,9 @@ class FakeCurrencyRepositoryImpl () : CurrencyRepository {
         shouldReturnNetworkError = value
     }
 
-    override suspend fun getRates(): Resource<LatestCurrencyResponse> {
+    override suspend fun getRates(): Resource<LatestCurrencyDto> {
 
-        val result = LatestCurrencyResponse(
+        val result = LatestCurrencyDto(
             base = "EUR",
             date = "",
             rates = mapOf("USD" to 0.98, "AED" to 1.25),

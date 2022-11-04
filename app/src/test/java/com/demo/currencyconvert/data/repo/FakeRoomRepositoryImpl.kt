@@ -1,7 +1,7 @@
 package com.demo.currencyconvert.data.repo
 
-import com.demo.currencyconvert.data.room.CurrencyEntity
-import com.demo.currencyconvert.data.room.LatestRateEntity
+import com.demo.currencyconvert.feature_currency_convert.data.local.entity.CurrencyEntity
+import com.demo.currencyconvert.feature_currency_convert.data.local.entity.LatestRateEntity
 
 class FakeRoomRepositoryImpl() : RoomRepository {
     override suspend fun insert(currencyEntity: CurrencyEntity) {

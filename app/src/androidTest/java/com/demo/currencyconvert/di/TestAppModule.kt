@@ -2,7 +2,7 @@ package com.demo.currencyconvert.di
 
 import android.content.Context
 import androidx.room.Room
-import com.demo.currencyconvert.data.room.CurrencyDatabase
+import com.demo.currencyconvert.feature_currency_convert.data.local.CurrencyDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -3,10 +3,10 @@ package com.demo.currencyconvert.viewmodel
 import androidx.databinding.ObservableDouble
 import com.demo.currencyconvert.data.repo.FakeCurrencyRepositoryImpl
 import com.demo.currencyconvert.data.repo.FakeRoomRepositoryImpl
-import com.demo.currencyconvert.data.room.CurrencyEntity
-import com.demo.currencyconvert.data.room.LatestRateEntity
-import com.demo.currencyconvert.utils.Constants
-import com.google.common.truth.Truth
+import com.demo.currencyconvert.feature_currency_convert.data.local.entity.CurrencyEntity
+import com.demo.currencyconvert.feature_currency_convert.data.local.entity.LatestRateEntity
+import com.demo.currencyconvert.core.common.Constants
+import com.demo.currencyconvert.feature_currency_convert.presentation.CurrencyViewModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
