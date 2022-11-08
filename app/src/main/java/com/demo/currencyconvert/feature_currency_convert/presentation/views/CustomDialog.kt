@@ -15,8 +15,7 @@ class CustomDialog {
             from: String,
             fromAmount: String,
             to: String,
-            toAmount: String,
-            commissionMsg: String
+            toAmount: String
         ) {
             val dialog = Dialog(activity!!)
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -32,8 +31,6 @@ class CustomDialog {
                 activity.getString(R.string.tv_dialog_transfer_message, from, fromAmount)
             tvReceivedAmount.text =
                 activity.getString(R.string.tv_dialog_receive_message, to, toAmount)
-
-            tvDialogCommission.text = commissionMsg
 
 
             val dialogDone = dialog.findViewById<TextView>(R.id.txt_done)

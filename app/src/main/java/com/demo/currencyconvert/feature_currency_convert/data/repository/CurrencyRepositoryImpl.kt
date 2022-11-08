@@ -1,94 +1,70 @@
 package com.demo.currencyconvert.feature_currency_convert.data.repository
 
-import com.demo.currencyconvert.feature_currency_convert.data.models.ConvertResponse
-import com.demo.currencyconvert.feature_currency_convert.data.remote.dto.LatestCurrencyDto
 import com.demo.currencyconvert.feature_currency_convert.data.remote.CurrencyApi
 import com.demo.currencyconvert.core.utils.Resource
 import com.demo.currencyconvert.feature_currency_convert.data.local.CurrencyDAO
 import com.demo.currencyconvert.feature_currency_convert.data.local.entity.CurrencyEntity
 import com.demo.currencyconvert.feature_currency_convert.data.local.entity.LatestRateEntity
+import com.demo.currencyconvert.feature_currency_convert.domain.model.LatestCurrency
+import com.demo.currencyconvert.feature_currency_convert.domain.model.UserCurrency
 import com.demo.currencyconvert.feature_currency_convert.domain.repository.CurrencyRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class CurrencyRepositoryImpl @Inject constructor(
     private val api: CurrencyApi,
-    private val currencyDAO: CurrencyDAO
+    private val dao: CurrencyDAO
 ) : CurrencyRepository {
 
-    override suspend fun getRates(): Resource<LatestCurrencyDto> {
-        return try {
-            val response = api.getRates("EUR")
-            val result = response.body()
-            if (response.isSuccessful && result != null) {
-                Resource.Success(result)
-            } else {
-                Resource.Error(response.message())
+    override fun getAndInsertLatestCurrencyRates(): Flow<Resource<LatestCurrency>> = flow {
+        emit(Resource.Loading())
+        try {
+            val remoteLatestRates = api.getRates("EUR")
+            dao.deleteAllLatestRates()
+            for (item in remoteLatestRates.rates) {
+                val latestRateEntity = LatestRateEntity(item.key, item.value)
+                dao.insertRate(latestRateEntity)
             }
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Something went wrong!")
+
+        } catch (e: HttpException) {
+            emit(Resource.Error(null, message = "Oops, something went wrong!"))
+        } catch (e: IOException) {
+
         }
     }
 
-    override suspend fun getConverted(
-        from: String,
-        to: String,
-        amount: Double
-    ): Resource<ConvertResponse> {
-
-        return try {
-            val response = api.getConverted(from, to, amount)
-            val result = response.body()
-            if (response.isSuccessful && result != null) {
-                Resource.Success(result)
-            } else {
-                Resource.Error(response.message())
-            }
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Something went wrong!")
-        }
+    override fun getAllUserCurrencies(): Flow<Resource<List<UserCurrency>>> = flow {
+        emit(Resource.Loading())
+        val allUserCurrencies = dao.getAllCurrencies().map { it.toUserCurrency() }
+        emit(Resource.Success(data = allUserCurrencies))
     }
 
-    // user currency
-    override suspend fun insert(currencyEntity: CurrencyEntity) {
-        withContext(Dispatchers.IO) {
-            currencyDAO.insert(currencyEntity)
-        }
+    override suspend fun addUserCurrency(userCurrency: UserCurrency) {
+        dao.insert(userCurrency.toCurrencyEntity())
     }
 
-    override suspend fun checkCurrencyByKey(key: String): Int {
-        return currencyDAO.containsPrimaryKey(key)
+    override suspend fun checkUserCurrencyByName(key: String): Int {
+        return dao.containsCurrency(key)
     }
 
-    override suspend fun update(currencyEntity: CurrencyEntity) {
-        currencyDAO.update(currencyEntity)
+    override suspend fun getUserCurrencyByName(key: String?): UserCurrency {
+        return dao.getCurrencyByKey(key).toUserCurrency()
     }
 
-    override suspend fun getAllCurrencies(): List<CurrencyEntity> {
-        return currencyDAO.getAllCurrencies()
+    override suspend fun updateSumUserCurrency(key: String, balance: Double) {
+        dao.updateSum(key, balance)
     }
 
-    override suspend fun getCurrencyByKey(key: String?): CurrencyEntity {
-        return currencyDAO.getCurrencyByKey(key)
-    }
-
-    override suspend fun updateSum(key: String, balance: Double) {
-        currencyDAO.updateSum(key, balance)
+    override suspend fun updateMinusUserCurrency(key: String, balance: Double) {
+        dao.updateMinus(key, balance)
     }
 
 
-    override suspend fun updateMinus(key: String, balance: Double) {
-        currencyDAO.updateMinus(key, balance)
-    }
-
-    // latest rates
-    override suspend fun insertRate(rateEntity: LatestRateEntity) {
-        currencyDAO.insertRate(rateEntity)
-    }
-
-    override suspend fun getLatestRateByKey(key: String?): LatestRateEntity {
-        return currencyDAO.getLatestRateByKey(key)
+    override suspend fun getLatestCurrencyRateByName(key: String?): LatestCurrency {
+        return dao.getLatestRateByKey(key).toLatestCurrency()
     }
 
 }

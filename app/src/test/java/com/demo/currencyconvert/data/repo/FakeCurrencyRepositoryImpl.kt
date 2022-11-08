@@ -1,9 +1,10 @@
 package com.demo.currencyconvert.data.repo
 
-import com.demo.currencyconvert.feature_currency_convert.data.models.ConvertResponse
-import com.demo.currencyconvert.feature_currency_convert.data.remote.dto.LatestCurrencyDto
-import com.demo.currencyconvert.feature_currency_convert.domain.repository.CurrencyRepository
 import com.demo.currencyconvert.core.utils.Resource
+import com.demo.currencyconvert.feature_currency_convert.domain.model.LatestCurrency
+import com.demo.currencyconvert.feature_currency_convert.domain.model.UserCurrency
+import com.demo.currencyconvert.feature_currency_convert.domain.repository.CurrencyRepository
+import kotlinx.coroutines.flow.Flow
 
 class FakeCurrencyRepositoryImpl () : CurrencyRepository {
 
@@ -13,29 +14,36 @@ class FakeCurrencyRepositoryImpl () : CurrencyRepository {
         shouldReturnNetworkError = value
     }
 
-    override suspend fun getRates(): Resource<LatestCurrencyDto> {
-
-        val result = LatestCurrencyDto(
-            base = "EUR",
-            date = "",
-            rates = mapOf("USD" to 0.98, "AED" to 1.25),
-            success = true,
-            timestamp = 12345
-        )
-
-        return if (shouldReturnNetworkError) {
-            Resource.Error("Error")
-        } else {
-            Resource.Success(result)
-        }
+    override fun getAndInsertLatestCurrencyRates(): Flow<Resource<LatestCurrency>> {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun getConverted(
-        from: String,
-        to: String,
-        amount: Double
-    ): Resource<ConvertResponse> {
-        TODO("No need to implement")
+    override fun getAllUserCurrencies(): Flow<Resource<List<UserCurrency>>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun addUserCurrency(userCurrency: UserCurrency) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun checkUserCurrencyByName(key: String): Int {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getUserCurrencyByName(key: String?): UserCurrency {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateSumUserCurrency(key: String, balance: Double) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateMinusUserCurrency(key: String, balance: Double) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLatestCurrencyRateByName(key: String?): LatestCurrency {
+        TODO("Not yet implemented")
     }
 
 

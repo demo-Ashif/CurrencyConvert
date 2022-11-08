@@ -119,6 +119,7 @@
             android:textColor="#6994ff"
             android:textStyle="bold|italic"
             android:textSize="13sp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/tvTransferredAmount"
             app:layout_constraintTop_toBottomOf="@+id/tvTransferredAmount"
             tools:ignore="HardcodedText,RtlHardcoded,SpUsage" />

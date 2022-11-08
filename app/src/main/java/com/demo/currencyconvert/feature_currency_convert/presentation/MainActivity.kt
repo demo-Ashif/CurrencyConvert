@@ -76,11 +76,8 @@ class MainActivity : AppCompatActivity() {
 
 
         initAllObservers()
-
         viewModel.setInitialCurrency()
-
         getLatestRateRepeatMethod()
-
 
     }
 
@@ -90,7 +87,7 @@ class MainActivity : AppCompatActivity() {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     viewModel.getLatestRates()
-                    delay(30000)
+                    delay(60000)
                 }
             }
         }
@@ -101,26 +98,20 @@ class MainActivity : AppCompatActivity() {
             viewModel.conversionEvent.collect { event ->
                 when (event) {
 
-                    is CurrencyViewModel.CurrencyConversionEvent.ConversionFailure -> {
+                    is CurrencyViewModel.CurrencyUiEvent.ConversionFailure -> {
                         binding.progressBar.isVisible = false
 
                         binding.tvResultText.setTextColor(Color.RED)
                         binding.tvResultText.text = event.errorText
                     }
-//                    is CurrencyViewModel.CurrencyConversionEvent.CheckValidationSuccess -> {
-//                        binding.tvResultText.setTextColor(Color.TRANSPARENT)
-//                        binding.tvResultText.text = ""
-//                        //binding.tvResultText.text = "All validation success before converting!"
-//                        viewModel.convertCurrency(event.from, event.to, event.fromAmount)
-//                    }
 
-                    is CurrencyViewModel.CurrencyConversionEvent.Loading -> {
+                    is CurrencyViewModel.CurrencyUiEvent.Loading -> {
                         binding.progressBar.isVisible = true
                     }
 
-                    is CurrencyViewModel.CurrencyConversionEvent.ConversionSuccess -> {
+                    is CurrencyViewModel.CurrencyUiEvent.ConversionSuccess -> {
                         binding.progressBar.isVisible = false
-                        binding.tvConvertedAmountText.text = event.successMsg
+                        binding.tvConvertedAmountText.text = "${event.from} ${event.fromAmount} -> ${event.to} ${event.convertedAmount}"
 
                         binding.tvResultText.setTextColor(Color.TRANSPARENT)
                         binding.tvResultText.text = ""
@@ -133,25 +124,16 @@ class MainActivity : AppCompatActivity() {
                             event.from,
                             String.format("%.2f", event.fromAmount),
                             event.to,
-                            String.format("%.2f", event.convertedAmount),
-                            event.commissionMsg
-                        )
-
-                        viewModel.roomDbUpdateData(
-                            event.from,
-                            event.fromAmount,
-                            event.to,
-                            event.convertedAmount,
-                            viewModel.currentCommission.get()
+                            String.format("%.2f", event.convertedAmount)
                         )
 
                     }
-                    is CurrencyViewModel.CurrencyConversionEvent.AddNewCurrencySuccess -> {
+                    is CurrencyViewModel.CurrencyUiEvent.AddNewCurrencySuccess -> {
                         binding.tvResultText.setTextColor(Color.TRANSPARENT)
                         binding.tvResultText.text = ""
                         showSnackBar(binding.root, event.successMsg)
                     }
-                    is CurrencyViewModel.CurrencyConversionEvent.AddNewCurrencyFailure -> {
+                    is CurrencyViewModel.CurrencyUiEvent.AddNewCurrencyFailure -> {
                         binding.tvResultText.setTextColor(Color.TRANSPARENT)
                         binding.tvResultText.text = ""
                         showSnackBar(binding.root, event.errorText)
@@ -161,22 +143,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.roomEvent.collect { event ->
-                when (event) {
-                    is CurrencyViewModel.RoomDataUpdateEvent.InsertNeeded -> {
-                        viewModel.getAllCurrencies()
-                    }
-                    is CurrencyViewModel.RoomDataUpdateEvent.CheckComplete -> {
-                        viewModel.getAllCurrencies()
-                    }
-
-                    else -> Unit
-                }
-            }
-        }
-
-        viewModel.allCurrencies.observe(this) { allCurrencies ->
+        viewModel.allUserCurrencies.observe(this) { allCurrencies ->
             currencyAdapter.setCurrencies(allCurrencies)
 
             userFromCurrencyList.clear()
