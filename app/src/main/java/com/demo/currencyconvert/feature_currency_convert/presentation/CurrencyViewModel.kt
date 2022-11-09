@@ -56,12 +56,12 @@ class CurrencyViewModel @Inject constructor(
     fun getLatestRates() {
         viewModelScope.launch(dispatcher.io) {
 
-            repository.getAllUserCurrencies().collect { result ->
+            repository.getAndInsertLatestCurrencyRates().collect { result ->
                 when (result) {
                     is Resource.Error -> _conversionEvent.value =
                         CurrencyUiEvent.ConversionFailure(result.message!!)
-                    is Resource.Loading -> TODO()
-                    is Resource.Success -> TODO()
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {}
                 }
             }
         }
@@ -170,9 +170,16 @@ class CurrencyViewModel @Inject constructor(
             try {
                 repository.getAllUserCurrencies().collect { result ->
                     when (result) {
-                        is Resource.Error -> TODO()
-                        is Resource.Loading -> TODO()
-                        is Resource.Success -> _allUserCurrencies.postValue(result.data!!)
+                        is Resource.Error -> {
+
+                        }
+                        is Resource.Loading -> {
+
+                        }
+                        is Resource.Success -> {
+                            Log.d(TAG, result.data.toString())
+                            _allUserCurrencies.postValue(result.data!!)
+                        }
                     }
                 }
 

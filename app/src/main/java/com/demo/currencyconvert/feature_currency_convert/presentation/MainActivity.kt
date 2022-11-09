@@ -3,6 +3,7 @@ package com.demo.currencyconvert.feature_currency_convert.presentation
 import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
@@ -77,8 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         initAllObservers()
         viewModel.setInitialCurrency()
-        getLatestRateRepeatMethod()
-
+        //getLatestRateRepeatMethod()
     }
 
     private fun getLatestRateRepeatMethod() {
@@ -144,6 +144,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.allUserCurrencies.observe(this) { allCurrencies ->
+
+//            Log.d("all user currencies:", allCurrencies.toString())
             currencyAdapter.setCurrencies(allCurrencies)
 
             userFromCurrencyList.clear()

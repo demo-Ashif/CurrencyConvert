@@ -1,5 +1,6 @@
 package com.demo.currencyconvert.feature_currency_convert.data.repository
 
+import android.util.Log
 import com.demo.currencyconvert.feature_currency_convert.data.remote.CurrencyApi
 import com.demo.currencyconvert.core.utils.Resource
 import com.demo.currencyconvert.feature_currency_convert.data.local.CurrencyDAO
@@ -38,8 +39,13 @@ class CurrencyRepositoryImpl @Inject constructor(
 
     override fun getAllUserCurrencies(): Flow<Resource<List<UserCurrency>>> = flow {
         emit(Resource.Loading())
-        val allUserCurrencies = dao.getAllCurrencies().map { it.toUserCurrency() }
-        emit(Resource.Success(data = allUserCurrencies))
+        try {
+            val allUserCurrencies = dao.getAllCurrencies().map { it.toUserCurrency() }
+            emit(Resource.Success(data = allUserCurrencies))
+        } catch (e: Exception) {
+            Log.e("error:", e.toString())
+        }
+
     }
 
     override suspend fun addUserCurrency(userCurrency: UserCurrency) {
